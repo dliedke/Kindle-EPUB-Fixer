@@ -324,13 +324,18 @@
     <div id="previewOverlay" class="preview-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="preview-title">
       <div class="preview-dialog">
         <header class="preview-head">
-          <strong id="preview-title" data-i18n="preview.title">Prévia do primeiro capítulo</strong>
+          <strong id="preview-title" data-i18n="preview.title">Prévia do livro</strong>
           <button id="previewClose" class="icon-button" type="button" data-i18n-aria-label="preview.close" aria-label="Fechar">×</button>
         </header>
         <div class="preview-modes" role="group" data-i18n-aria-label="preview.modesLabel" aria-label="Modo de margem">
           <button class="preview-mode active" data-mode="original" type="button" data-i18n="preview.original">Original</button>
           <button class="preview-mode" data-mode="reduced" type="button" data-i18n="preview.reduced">Margens reduzidas</button>
           <button class="preview-mode" data-mode="mini" type="button" data-i18n="preview.mini">Mini-margens</button>
+        </div>
+        <div class="preview-nav">
+          <button id="previewPrev" class="preview-nav-button" type="button" data-i18n-aria-label="preview.prevChapter" aria-label="Capítulo anterior">‹</button>
+          <span id="previewPageLabel" class="preview-page-label"></span>
+          <button id="previewNext" class="preview-nav-button" type="button" data-i18n-aria-label="preview.nextChapter" aria-label="Próximo capítulo">›</button>
         </div>
         <div id="previewBody" class="preview-body"><iframe id="previewFrame" sandbox="" title="Prévia"></iframe></div>
         <p id="previewNote" class="preview-note" data-i18n="preview.note">Prévia aproximada, sem scripts. O Kindle pode renderizar de forma diferente.</p>

@@ -93,6 +93,9 @@
     previewOverlay: document.getElementById("previewOverlay"),
     previewClose: document.getElementById("previewClose"),
     previewFrame: document.getElementById("previewFrame"),
+    previewPrev: document.getElementById("previewPrev"),
+    previewNext: document.getElementById("previewNext"),
+    previewPageLabel: document.getElementById("previewPageLabel"),
     downloadButton: document.getElementById("downloadButton"),
     sendToKindleLink: document.getElementById("sendToKindleLink"),
     supportLink: document.getElementById("supportLink"),
@@ -203,8 +206,13 @@
         if (event.target === dom.previewOverlay) closePreview();
       });
     }
+    if (dom.previewPrev) dom.previewPrev.addEventListener("click", () => showPreviewChapter(previewState.index - 1));
+    if (dom.previewNext) dom.previewNext.addEventListener("click", () => showPreviewChapter(previewState.index + 1));
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && dom.previewOverlay && !dom.previewOverlay.classList.contains("hidden")) closePreview();
+      if (!dom.previewOverlay || dom.previewOverlay.classList.contains("hidden")) return;
+      if (event.key === "Escape") closePreview();
+      else if (event.key === "ArrowLeft") showPreviewChapter(previewState.index - 1);
+      else if (event.key === "ArrowRight") showPreviewChapter(previewState.index + 1);
     });
     document.querySelectorAll(".preview-mode").forEach((button) => {
       button.addEventListener("click", () => setPreviewMode(button.dataset.mode || "original"));
@@ -666,35 +674,85 @@
     }
   }
 
-  const previewState = { baseHtml: null };
+  const previewState = { zip: null, chapters: [], index: 0, mode: "original", cache: new Map(), baseHtml: null };
 
   async function openPreview() {
     if (!state.inputFile || !dom.previewOverlay) return;
-    const chapter = await extractFirstChapter(state.inputFile).catch(() => null);
-    if (!chapter) {
+    let spine = null;
+    let zip = null;
+    try {
+      zip = await JSZip.loadAsync(state.inputFile, { checkCRC32: true, createFolders: true });
+      spine = await buildPreviewSpine(zip);
+    } catch {
+      spine = null;
+    }
+    if (!spine) {
       window.alert(t("preview.unavailable"));
       return;
     }
-    previewState.baseHtml = chapter.html;
-    setPreviewMode("original");
+    previewState.zip = zip;
+    previewState.chapters = spine.chapters;
+    previewState.cache.clear();
+    previewState.mode = "original";
+    document.querySelectorAll(".preview-mode").forEach((button) => {
+      button.classList.toggle("active", button.dataset.mode === "original");
+    });
     dom.previewOverlay.classList.remove("hidden");
+    await showPreviewChapter(0);
   }
 
   function closePreview() {
     if (!dom.previewOverlay) return;
     dom.previewOverlay.classList.add("hidden");
     if (dom.previewFrame) dom.previewFrame.srcdoc = "";
+    previewState.zip = null;
+    previewState.chapters = [];
+    previewState.cache.clear();
+    previewState.baseHtml = null;
+  }
+
+  async function showPreviewChapter(index) {
+    if (!previewState.chapters.length || !dom.previewFrame) return;
+    const clamped = Math.min(Math.max(index, 0), previewState.chapters.length - 1);
+    previewState.index = clamped;
+    let html = previewState.cache.get(clamped);
+    if (html === undefined) {
+      html = await extractChapterHtml(previewState.zip, previewState.chapters[clamped]).catch(() => null);
+      previewState.cache.set(clamped, html || null);
+    }
+    previewState.baseHtml = html;
+    updatePreviewNav();
+    renderPreviewFrame();
+  }
+
+  function updatePreviewNav() {
+    if (dom.previewPageLabel) {
+      dom.previewPageLabel.textContent = t("preview.pageLabel", {
+        current: previewState.index + 1,
+        total: previewState.chapters.length
+      });
+    }
+    if (dom.previewPrev) dom.previewPrev.disabled = previewState.index <= 0;
+    if (dom.previewNext) dom.previewNext.disabled = previewState.index >= previewState.chapters.length - 1;
+  }
+
+  function renderPreviewFrame() {
+    if (!dom.previewFrame) return;
+    if (!previewState.baseHtml) {
+      dom.previewFrame.srcdoc = "";
+      return;
+    }
+    dom.previewFrame.srcdoc = previewState.mode === "original"
+      ? previewState.baseHtml
+      : applyReducedMargins(previewState.baseHtml, previewState.mode === "mini" ? "mini" : "reduced");
   }
 
   function setPreviewMode(mode) {
-    if (!previewState.baseHtml || !dom.previewFrame) return;
-    const html = mode === "original"
-      ? previewState.baseHtml
-      : applyReducedMargins(previewState.baseHtml, mode === "mini" ? "mini" : "reduced");
-    dom.previewFrame.srcdoc = html;
+    previewState.mode = mode;
     document.querySelectorAll(".preview-mode").forEach((button) => {
       button.classList.toggle("active", button.dataset.mode === mode);
     });
+    renderPreviewFrame();
   }
 
   function bytesToDataUrl(bytes, mime) {
@@ -792,8 +850,7 @@
     return output;
   }
 
-  async function extractFirstChapter(file) {
-    const zip = await JSZip.loadAsync(file, { checkCRC32: true, createFolders: true });
+  async function buildPreviewSpine(zip) {
     const sourcePaths = Object.values(zip.files)
       .filter((entry) => !entry.dir)
       .map((entry) => normalizeSlashes(entry.name));
@@ -818,16 +875,23 @@
       if (id) itemsById.set(id, item);
     }
 
-    const firstItemref = getDirectChildren(spine, "itemref")[0];
-    if (!firstItemref) return null;
-    const item = itemsById.get(firstItemref.getAttribute("idref") || "");
-    if (!item) return null;
-    const mediaType = item.getAttribute("media-type") || "";
-    if (mediaType !== "application/xhtml+xml" && mediaType !== "text/html") return null;
+    const chapters = [];
+    for (const itemref of getDirectChildren(spine, "itemref")) {
+      const item = itemsById.get(itemref.getAttribute("idref") || "");
+      if (!item) continue;
+      const mediaType = item.getAttribute("media-type") || "";
+      if (mediaType !== "application/xhtml+xml" && mediaType !== "text/html") continue;
+      const href = item.getAttribute("href") || "";
+      const { pathPart } = splitReference(href);
+      if (!pathPart) continue;
+      chapters.push(normalizePackagePath(joinPath(dirname(opfPath), pathPart)));
+    }
+    if (!chapters.length) return null;
 
-    const href = item.getAttribute("href") || "";
-    const { pathPart } = splitReference(href);
-    const chapterPath = normalizePackagePath(joinPath(dirname(opfPath), pathPart));
+    return { opfPath, chapters };
+  }
+
+  async function extractChapterHtml(zip, chapterPath) {
     let chapterHtml = await readZipTextQuiet(zip, chapterPath);
     if (!chapterHtml) return null;
 
@@ -851,7 +915,7 @@
         : chapterHtml.replace(/(<html\b[^>]*>)/i, `$1<head>${styleTag}</head>`);
     }
 
-    return { html: chapterHtml };
+    return chapterHtml;
   }
 
   async function inspectEncryption(zip, paths) {
