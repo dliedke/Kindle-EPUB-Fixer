@@ -89,6 +89,10 @@
     progressBar: document.getElementById("progressBar"),
     progressDetail: document.getElementById("progressDetail"),
     repairButton: document.getElementById("repairButton"),
+    previewButton: document.getElementById("previewButton"),
+    previewOverlay: document.getElementById("previewOverlay"),
+    previewClose: document.getElementById("previewClose"),
+    previewFrame: document.getElementById("previewFrame"),
     downloadButton: document.getElementById("downloadButton"),
     sendToKindleLink: document.getElementById("sendToKindleLink"),
     supportLink: document.getElementById("supportLink"),
@@ -103,7 +107,10 @@
     fileCount: document.getElementById("fileCount"),
     resultBanner: document.getElementById("resultBanner"),
     resultTitle: document.getElementById("resultTitle"),
-    resultText: document.getElementById("resultText")
+    resultText: document.getElementById("resultText"),
+    scoreCard: document.getElementById("scoreCard"),
+    scoreValue: document.getElementById("scoreValue"),
+    scoreTier: document.getElementById("scoreTier")
   };
 
   const optionIds = [
@@ -122,9 +129,44 @@
     lastResult: null
   };
 
+  const STORAGE_KEYS = { options: "kef.options", lang: "kef.lang" };
+
+  function safeStorageGet(key) {
+    try { return window.localStorage.getItem(key); } catch { return null; }
+  }
+  function safeStorageSet(key, value) {
+    try { window.localStorage.setItem(key, value); } catch { /* indisponível (file://, modo anônimo) */ }
+  }
+
+  function persistOptions() {
+    safeStorageSet(STORAGE_KEYS.options, JSON.stringify(readOptions()));
+  }
+
+  function applyStoredOptions() {
+    const raw = safeStorageGet(STORAGE_KEYS.options);
+    if (!raw) return;
+    let saved;
+    try { saved = JSON.parse(raw); } catch { return; }
+    for (const id of optionIds) {
+      const element = document.getElementById(id);
+      if (element && typeof saved[id] === "boolean" && !element.disabled) element.checked = saved[id];
+    }
+    const miniMarginsInput = document.getElementById("miniMargins");
+    const reduceMarginsInput = document.getElementById("reduceMargins");
+    if (miniMarginsInput?.checked && reduceMarginsInput) reduceMarginsInput.checked = false;
+  }
+
+  function applyStoredLanguage() {
+    const stored = safeStorageGet(STORAGE_KEYS.lang);
+    if (!stored) return;
+    const supported = i18n?.getLanguages?.().some((language) => language.code === stored);
+    if (!supported) return;
+    i18n?.setLanguage(stored);
+  }
+
   function initialize() {
     i18n?.initialize();
-    applyLanguageFromUrl();
+    if (!applyLanguageFromUrl()) applyStoredLanguage();
     if (dom.languageSelect) {
       populateLanguageOptions();
       dom.languageSelect.value = i18n?.getLanguage() || "en";
@@ -132,6 +174,7 @@
         i18n?.setLanguage(dom.languageSelect.value);
         urlLanguageParamActive = true;
         updateUrlLanguageParam(dom.languageSelect.value);
+        safeStorageSet(STORAGE_KEYS.lang, dom.languageSelect.value);
       });
     }
     window.addEventListener("epubfixer:languagechange", refreshLocalizedInterface);
@@ -153,6 +196,19 @@
     dom.removeFileButton.addEventListener("click", clearSelectedFile);
     dom.recommendedButton.addEventListener("click", useRecommendedOptions);
     dom.repairButton.addEventListener("click", repairSelectedFile);
+    if (dom.previewButton) dom.previewButton.addEventListener("click", openPreview);
+    if (dom.previewClose) dom.previewClose.addEventListener("click", closePreview);
+    if (dom.previewOverlay) {
+      dom.previewOverlay.addEventListener("click", (event) => {
+        if (event.target === dom.previewOverlay) closePreview();
+      });
+    }
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && dom.previewOverlay && !dom.previewOverlay.classList.contains("hidden")) closePreview();
+    });
+    document.querySelectorAll(".preview-mode").forEach((button) => {
+      button.addEventListener("click", () => setPreviewMode(button.dataset.mode || "original"));
+    });
     dom.downloadButton.addEventListener("click", downloadOutput);
     dom.downloadReportButton.addEventListener("click", downloadReport);
 
@@ -179,17 +235,23 @@
     });
 
     bindExclusiveMarginOptions();
+
+    applyStoredOptions();
+    for (const id of optionIds) {
+      document.getElementById(id)?.addEventListener("change", persistOptions);
+    }
   }
 
   // Só troca o idioma via URL quando ?lang= vier explícito e for suportado;
   // sem o parâmetro, mantém a detecção automática do navegador feita por i18n.initialize().
   function applyLanguageFromUrl() {
     const requested = new URLSearchParams(window.location.search).get("lang");
-    if (!requested) return;
+    if (!requested) return false;
     const supported = i18n?.getLanguages?.().some((language) => language.code === requested);
-    if (!supported) return;
+    if (!supported) return false;
     urlLanguageParamActive = true;
     i18n?.setLanguage(requested);
+    return true;
   }
 
   function updateUrlLanguageParam(code) {
@@ -283,6 +345,7 @@
     dom.dropZone.classList.add("hidden");
     dom.selectedFile.classList.remove("hidden");
     dom.repairButton.disabled = false;
+    if (dom.previewButton) dom.previewButton.classList.remove("hidden");
     dom.downloadButton.classList.add("hidden");
     if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
     if (dom.supportLink) dom.supportLink.classList.add("hidden");
@@ -302,6 +365,7 @@
     dom.dropZone.classList.remove("hidden");
     dom.selectedFile.classList.add("hidden");
     dom.repairButton.disabled = true;
+    if (dom.previewButton) dom.previewButton.classList.add("hidden");
     dom.downloadButton.classList.add("hidden");
     if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
     if (dom.supportLink) dom.supportLink.classList.add("hidden");
@@ -327,6 +391,7 @@
       const element = document.getElementById(id);
       if (element) element.checked = checked;
     }
+    persistOptions();
   }
 
   function readOptions() {
@@ -599,6 +664,194 @@
       dom.repairButton.disabled = !state.inputFile;
       if (dom.languageSelect) dom.languageSelect.disabled = false;
     }
+  }
+
+  const previewState = { baseHtml: null };
+
+  async function openPreview() {
+    if (!state.inputFile || !dom.previewOverlay) return;
+    const chapter = await extractFirstChapter(state.inputFile).catch(() => null);
+    if (!chapter) {
+      window.alert(t("preview.unavailable"));
+      return;
+    }
+    previewState.baseHtml = chapter.html;
+    setPreviewMode("original");
+    dom.previewOverlay.classList.remove("hidden");
+  }
+
+  function closePreview() {
+    if (!dom.previewOverlay) return;
+    dom.previewOverlay.classList.add("hidden");
+    if (dom.previewFrame) dom.previewFrame.srcdoc = "";
+  }
+
+  function setPreviewMode(mode) {
+    if (!previewState.baseHtml || !dom.previewFrame) return;
+    const html = mode === "original"
+      ? previewState.baseHtml
+      : applyReducedMargins(previewState.baseHtml, mode === "mini" ? "mini" : "reduced");
+    dom.previewFrame.srcdoc = html;
+    document.querySelectorAll(".preview-mode").forEach((button) => {
+      button.classList.toggle("active", button.dataset.mode === mode);
+    });
+  }
+
+  function bytesToDataUrl(bytes, mime) {
+    let binary = "";
+    const CHUNK = 0x8000;
+    for (let index = 0; index < bytes.length; index += CHUNK) {
+      binary += String.fromCharCode(...bytes.subarray(index, index + CHUNK));
+    }
+    return `data:${mime || "application/octet-stream"};base64,${btoa(binary)}`;
+  }
+
+  const PREVIEW_MAX_ASSET_BYTES = 2 * 1024 * 1024;
+
+  async function findOpfPathQuiet(zip, sourcePaths) {
+    const containerPath = sourcePaths.find((path) => path.toLowerCase() === "meta-inf/container.xml");
+    if (containerPath) {
+      const entry = zip.file(containerPath) || zip.file(findExactZipName(zip, containerPath));
+      if (entry) {
+        const text = decodeText(await entry.async("uint8array")).text;
+        const documentNode = parseXml(text);
+        if (documentNode) {
+          const rootfile = findFirstByLocalName(documentNode, "rootfile");
+          const fullPath = rootfile?.getAttribute("full-path");
+          if (fullPath) {
+            const matched = findPathLoosely(sourcePaths, fullPath);
+            if (matched) return matched;
+          }
+        }
+        const regexMatch = text.match(/full-path\s*=\s*["']([^"']+)["']/i);
+        if (regexMatch) {
+          const matched = findPathLoosely(sourcePaths, regexMatch[1]);
+          if (matched) return matched;
+        }
+      }
+    }
+    const opfCandidates = sourcePaths.filter((path) => getExtension(path) === ".opf");
+    if (opfCandidates.length === 1) return opfCandidates[0];
+    if (opfCandidates.length > 1) {
+      return opfCandidates.find((path) => /(^|\/)(content|package|book)\.opf$/i.test(path)) || opfCandidates[0];
+    }
+    return null;
+  }
+
+  async function readZipTextQuiet(zip, path) {
+    const entry = zip.file(path) || zip.file(findExactZipName(zip, path));
+    if (!entry) return null;
+    return decodeText(await entry.async("uint8array")).text;
+  }
+
+  async function readZipBytesQuiet(zip, path) {
+    const entry = zip.file(path) || zip.file(findExactZipName(zip, path));
+    if (!entry) return null;
+    return entry.async("uint8array");
+  }
+
+  async function inlineAssetsAsDataUrls(text, basePath, zip) {
+    const replacements = new Map();
+
+    const collectReference = (reference) => {
+      const trimmed = (reference || "").trim();
+      if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith("data:") || isExternalReference(trimmed)) return null;
+      const { pathPart } = splitReference(trimmed);
+      if (!pathPart) return null;
+      return normalizePackagePath(joinPath(dirname(basePath), pathPart));
+    };
+
+    const resolveDataUrl = async (reference) => {
+      const resolvedPath = collectReference(reference);
+      if (!resolvedPath) return null;
+      if (replacements.has(resolvedPath)) return replacements.get(resolvedPath);
+      try {
+        const bytes = await readZipBytesQuiet(zip, resolvedPath);
+        if (!bytes || bytes.byteLength > PREVIEW_MAX_ASSET_BYTES) return null;
+        const dataUrl = bytesToDataUrl(bytes, mediaTypeForPath(resolvedPath) || "application/octet-stream");
+        replacements.set(resolvedPath, dataUrl);
+        return dataUrl;
+      } catch {
+        return null;
+      }
+    };
+
+    let output = text;
+    const attributeMatches = [...output.matchAll(/(\b(?:src|xlink:href)\s*=\s*)(["'])([\s\S]*?)\2/gi)];
+    for (const match of attributeMatches) {
+      const dataUrl = await resolveDataUrl(match[3]);
+      if (dataUrl) output = output.replace(match[0], `${match[1]}${match[2]}${dataUrl}${match[2]}`);
+    }
+
+    const urlMatches = [...output.matchAll(/url\(\s*(["']?)([^)'"\s][^)]*?)\1\s*\)/gi)];
+    for (const match of urlMatches) {
+      const dataUrl = await resolveDataUrl(match[2]);
+      if (dataUrl) output = output.replace(match[0], `url(${dataUrl})`);
+    }
+
+    return output;
+  }
+
+  async function extractFirstChapter(file) {
+    const zip = await JSZip.loadAsync(file, { checkCRC32: true, createFolders: true });
+    const sourcePaths = Object.values(zip.files)
+      .filter((entry) => !entry.dir)
+      .map((entry) => normalizeSlashes(entry.name));
+    if (!sourcePaths.length) return null;
+
+    const opfPath = await findOpfPathQuiet(zip, sourcePaths);
+    if (!opfPath) return null;
+
+    const opfText = await readZipTextQuiet(zip, opfPath);
+    if (!opfText) return null;
+    const opfDocument = parseXml(opfText);
+    if (!opfDocument) return null;
+
+    const packageElement = opfDocument.documentElement;
+    const manifest = findDirectChild(packageElement, "manifest");
+    const spine = findDirectChild(packageElement, "spine");
+    if (!manifest || !spine) return null;
+
+    const itemsById = new Map();
+    for (const item of getDirectChildren(manifest, "item")) {
+      const id = item.getAttribute("id");
+      if (id) itemsById.set(id, item);
+    }
+
+    const firstItemref = getDirectChildren(spine, "itemref")[0];
+    if (!firstItemref) return null;
+    const item = itemsById.get(firstItemref.getAttribute("idref") || "");
+    if (!item) return null;
+    const mediaType = item.getAttribute("media-type") || "";
+    if (mediaType !== "application/xhtml+xml" && mediaType !== "text/html") return null;
+
+    const href = item.getAttribute("href") || "";
+    const { pathPart } = splitReference(href);
+    const chapterPath = normalizePackagePath(joinPath(dirname(opfPath), pathPart));
+    let chapterHtml = await readZipTextQuiet(zip, chapterPath);
+    if (!chapterHtml) return null;
+
+    const styleLinks = [...chapterHtml.matchAll(/<link\b[^>]*rel\s*=\s*["']stylesheet["'][^>]*>/gi)];
+    let cssText = "";
+    for (const linkMatch of styleLinks) {
+      const hrefMatch = linkMatch[0].match(/href\s*=\s*["']([^"']+)["']/i);
+      if (!hrefMatch) continue;
+      const cssPath = normalizePackagePath(joinPath(dirname(chapterPath), hrefMatch[1]));
+      const css = await readZipTextQuiet(zip, cssPath);
+      if (css) cssText += `\n${await inlineAssetsAsDataUrls(css, cssPath, zip)}`;
+      chapterHtml = chapterHtml.replace(linkMatch[0], "");
+    }
+
+    chapterHtml = await inlineAssetsAsDataUrls(chapterHtml, chapterPath, zip);
+
+    if (cssText) {
+      const styleTag = `<style type="text/css">${cssText}</style>`;
+      chapterHtml = /<\/head>/i.test(chapterHtml)
+        ? chapterHtml.replace(/<\/head>/i, `${styleTag}</head>`)
+        : chapterHtml.replace(/(<html\b[^>]*>)/i, `$1<head>${styleTag}</head>`);
+    }
+
+    return { html: chapterHtml };
   }
 
   async function inspectEncryption(zip, paths) {
@@ -1419,6 +1672,14 @@
     dom.fixedCount.textContent = String(stats.fixed);
     dom.fileCount.textContent = String(fileCount);
 
+    if (dom.scoreCard && dom.scoreValue && dom.scoreTier) {
+      const score = computeCompatibilityScore(stats, hasOutput);
+      dom.scoreValue.textContent = String(score.value);
+      dom.scoreTier.textContent = t(`score.tier.${score.tierKey}`);
+      dom.scoreCard.classList.remove("hidden", "score-excellent", "score-good", "score-fair", "score-low", "score-incompatible");
+      dom.scoreCard.classList.add(`score-${score.tierKey}`);
+    }
+
     dom.resultBanner.classList.remove("warning", "error");
     if (hasOutput && stats.errors === 0) {
       dom.resultTitle.textContent = t("result.successTitle");
@@ -1531,6 +1792,22 @@
     };
   }
 
+  const HEAVY_WARNINGS = new Set([
+    "REMOTE_RESOURCES", "LARGE_INTERNAL_FILE", "LONG_INTERNAL_PATH", "FINAL_XML_INVALID", "MALFORMED_XML"
+  ]);
+
+  function computeCompatibilityScore(stats, hasOutput) {
+    if (!hasOutput) return { value: 0, tierKey: "incompatible" };
+    let score = 100 - stats.errors * 20;
+    for (const issue of state.report) {
+      if (issue.level !== "warning") continue;
+      score -= HEAVY_WARNINGS.has(issue.code) ? 8 : 4;
+    }
+    score = Math.max(5, Math.min(100, Math.round(score)));
+    const tierKey = score >= 90 ? "excellent" : score >= 75 ? "good" : score >= 50 ? "fair" : "low";
+    return { value: score, tierKey };
+  }
+
   function localizedIssues() {
     return state.report.map((issue) => ({
       level: issue.level,
@@ -1550,7 +1827,11 @@
       input: inputFile ? { name: inputFile.name, size: inputFile.size, type: inputFile.type || "application/epub+zip" } : null,
       output: outputName ? { name: outputName, size: outputSize, type: "application/epub+zip" } : null,
       options,
-      summary: { ...calculateStats(), filesInOutput: fileCount },
+      summary: {
+        ...calculateStats(),
+        filesInOutput: fileCount,
+        compatibilityScore: computeCompatibilityScore(calculateStats(), Boolean(outputName)).value
+      },
       package: packageResult,
       issues: localizedIssues()
     };

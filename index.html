@@ -155,6 +155,14 @@
           <div class="summary-card"><span id="fileCount">0</span><small data-i18n="summary.files">arquivos</small></div>
         </div>
 
+        <div id="scoreCard" class="score-card hidden">
+          <div class="score-ring"><span id="scoreValue">0</span><small>/100</small></div>
+          <div class="score-copy">
+            <strong data-i18n="score.title">Nota de compatibilidade</strong>
+            <span id="scoreTier"></span>
+          </div>
+        </div>
+
         <div class="result-banner" id="resultBanner">
           <strong id="resultTitle"></strong>
           <span id="resultText"></span>
@@ -185,6 +193,10 @@
         <button id="repairButton" class="primary-button" type="button" disabled>
           <span aria-hidden="true">⚙</span>
           <span data-i18n="button.repair">Analisar e corrigir EPUB</span>
+        </button>
+        <button id="previewButton" class="secondary-button hidden" type="button">
+          <span aria-hidden="true">👁</span>
+          <span data-i18n="button.preview">Ver prévia das margens</span>
         </button>
         <button id="downloadButton" class="secondary-button hidden" type="button">
           <span aria-hidden="true">↓</span>
@@ -308,6 +320,22 @@
       <span>Kindle EPUB Fixer</span>
       <span data-i18n="footer.local">Funciona inteiramente no navegador.</span>
     </footer>
+
+    <div id="previewOverlay" class="preview-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="preview-title">
+      <div class="preview-dialog">
+        <header class="preview-head">
+          <strong id="preview-title" data-i18n="preview.title">Prévia do primeiro capítulo</strong>
+          <button id="previewClose" class="icon-button" type="button" data-i18n-aria-label="preview.close" aria-label="Fechar">×</button>
+        </header>
+        <div class="preview-modes" role="group" data-i18n-aria-label="preview.modesLabel" aria-label="Modo de margem">
+          <button class="preview-mode active" data-mode="original" type="button" data-i18n="preview.original">Original</button>
+          <button class="preview-mode" data-mode="reduced" type="button" data-i18n="preview.reduced">Margens reduzidas</button>
+          <button class="preview-mode" data-mode="mini" type="button" data-i18n="preview.mini">Mini-margens</button>
+        </div>
+        <div id="previewBody" class="preview-body"><iframe id="previewFrame" sandbox="" title="Prévia"></iframe></div>
+        <p id="previewNote" class="preview-note" data-i18n="preview.note">Prévia aproximada, sem scripts. O Kindle pode renderizar de forma diferente.</p>
+      </div>
+    </div>
   </main>
 
   <script src="vendor/jszip.min.js"></script>
