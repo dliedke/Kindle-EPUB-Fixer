@@ -351,6 +351,10 @@ legend {
 .primary-button:hover:not(:disabled), .secondary-button:hover { transform: translateY(-1px); }
 .primary-button:disabled { cursor: not-allowed; opacity: 0.45; box-shadow: none; }
 
+.support-note { margin-top: 14px; font-size: 0.85rem; color: var(--muted); }
+.support-note a { color: #ffd166; font-weight: 700; text-decoration: none; margin-left: 4px; }
+.support-note a:hover { text-decoration: underline; }
+
 .collapsible-panel { padding: 0; margin-bottom: 22px; }
 .collapsible-panel > summary {
   list-style: none;

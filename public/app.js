@@ -89,6 +89,7 @@
     repairButton: document.getElementById("repairButton"),
     downloadButton: document.getElementById("downloadButton"),
     sendToKindleLink: document.getElementById("sendToKindleLink"),
+    supportLink: document.getElementById("supportLink"),
     filenameField: document.getElementById("filenameField"),
     outputFilenameInput: document.getElementById("outputFilenameInput"),
     downloadReportButton: document.getElementById("downloadReportButton"),
@@ -225,6 +226,7 @@
     dom.repairButton.disabled = false;
     dom.downloadButton.classList.add("hidden");
     if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
+    if (dom.supportLink) dom.supportLink.classList.add("hidden");
     if (dom.filenameField) dom.filenameField.classList.add("hidden");
     showIdleState();
   }
@@ -243,6 +245,7 @@
     dom.repairButton.disabled = true;
     dom.downloadButton.classList.add("hidden");
     if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
+    if (dom.supportLink) dom.supportLink.classList.add("hidden");
     if (dom.filenameField) dom.filenameField.classList.add("hidden");
     showIdleState();
   }
@@ -308,6 +311,7 @@
     if (dom.languageSelect) dom.languageSelect.disabled = true;
     dom.downloadButton.classList.add("hidden");
     if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
+    if (dom.supportLink) dom.supportLink.classList.add("hidden");
     if (dom.filenameField) dom.filenameField.classList.add("hidden");
     const options = readOptions();
 
@@ -1368,6 +1372,7 @@
       dom.resultText.textContent = t("result.successText");
       dom.downloadButton.classList.remove("hidden");
       if (dom.sendToKindleLink) dom.sendToKindleLink.classList.remove("hidden");
+      if (dom.supportLink) dom.supportLink.classList.remove("hidden");
       showFilenameField();
     } else if (hasOutput) {
       dom.resultBanner.classList.add("warning");
@@ -1375,6 +1380,7 @@
       dom.resultText.textContent = t("result.warningText");
       dom.downloadButton.classList.remove("hidden");
       if (dom.sendToKindleLink) dom.sendToKindleLink.classList.remove("hidden");
+      if (dom.supportLink) dom.supportLink.classList.remove("hidden");
       showFilenameField();
     } else {
       dom.resultBanner.classList.add("error");
@@ -1382,6 +1388,7 @@
       dom.resultText.textContent = t("result.errorText");
       dom.downloadButton.classList.add("hidden");
       if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
+      if (dom.supportLink) dom.supportLink.classList.add("hidden");
       if (dom.filenameField) dom.filenameField.classList.add("hidden");
     }
     if (dom.reportDetails) dom.reportDetails.open = !hasOutput || stats.errors > 0;
