@@ -4,6 +4,8 @@
   const APP_NAME = "Kindle EPUB Fixer";
   const APP_VERSION = "1.1.0";
   const i18n = window.EpubFixerI18n;
+  const SITE_ORIGIN = "https://kindle-epub-fixer.web.app";
+  let urlLanguageParamActive = false;
 
   function t(key, variables = {}) {
     return i18n?.t(key, variables) || key;
@@ -122,14 +124,18 @@
 
   function initialize() {
     i18n?.initialize();
+    applyLanguageFromUrl();
     if (dom.languageSelect) {
       populateLanguageOptions();
       dom.languageSelect.value = i18n?.getLanguage() || "en";
       dom.languageSelect.addEventListener("change", () => {
         i18n?.setLanguage(dom.languageSelect.value);
+        urlLanguageParamActive = true;
+        updateUrlLanguageParam(dom.languageSelect.value);
       });
     }
     window.addEventListener("epubfixer:languagechange", refreshLocalizedInterface);
+    updateSeoMeta();
 
     if (typeof JSZip === "undefined") {
       setFatalInterfaceError(t("runtime.jszipMissing"));
@@ -175,6 +181,45 @@
     bindExclusiveMarginOptions();
   }
 
+  // Só troca o idioma via URL quando ?lang= vier explícito e for suportado;
+  // sem o parâmetro, mantém a detecção automática do navegador feita por i18n.initialize().
+  function applyLanguageFromUrl() {
+    const requested = new URLSearchParams(window.location.search).get("lang");
+    if (!requested) return;
+    const supported = i18n?.getLanguages?.().some((language) => language.code === requested);
+    if (!supported) return;
+    urlLanguageParamActive = true;
+    i18n?.setLanguage(requested);
+  }
+
+  function updateUrlLanguageParam(code) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("lang", code);
+    window.history.replaceState({}, "", url);
+  }
+
+  function setMetaAttribute(selector, attribute, value) {
+    const element = document.querySelector(selector);
+    if (element) element.setAttribute(attribute, value);
+  }
+
+  function updateSeoMeta() {
+    const code = i18n?.getLanguage() || "en";
+    const description = t("hero.copy");
+    const title = t("document.title");
+    const locale = (i18n?.getLocale?.() || "en-US").replace("-", "_");
+    const canonicalUrl = urlLanguageParamActive ? `${SITE_ORIGIN}/?lang=${code}` : `${SITE_ORIGIN}/`;
+
+    setMetaAttribute('meta[name="description"]', "content", description);
+    setMetaAttribute('link[rel="canonical"]', "href", canonicalUrl);
+    setMetaAttribute('meta[property="og:title"]', "content", title);
+    setMetaAttribute('meta[property="og:description"]', "content", description);
+    setMetaAttribute('meta[property="og:url"]', "content", canonicalUrl);
+    setMetaAttribute('meta[property="og:locale"]', "content", locale);
+    setMetaAttribute('meta[name="twitter:title"]', "content", title);
+    setMetaAttribute('meta[name="twitter:description"]', "content", description);
+  }
+
   function populateLanguageOptions() {
     const languages = i18n?.getLanguages?.();
     if (!dom.languageSelect || !Array.isArray(languages) || !languages.length) return;
@@ -204,6 +249,7 @@
   }
 
   function refreshLocalizedInterface() {
+    updateSeoMeta();
     if (dom.languageSelect) dom.languageSelect.value = i18n?.getLanguage() || "en";
     if (state.inputFile) dom.fileSize.textContent = formatBytes(state.inputFile.size);
     if (state.outputBlob && state.inputFile) {
