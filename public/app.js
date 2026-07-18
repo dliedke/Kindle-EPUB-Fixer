@@ -1398,7 +1398,9 @@
   }
 
   function canShareFiles() {
-    if (typeof navigator === "undefined" || !navigator.share || !navigator.canShare) return false;
+    if (typeof navigator === "undefined" || typeof navigator.share !== "function" || typeof navigator.canShare !== "function") {
+      return false;
+    }
     try {
       const probe = new File([""], "probe.epub", { type: "application/epub+zip" });
       return navigator.canShare({ files: [probe] });
@@ -1408,11 +1410,7 @@
   }
 
   async function shareOutput() {
-    if (!state.outputBlob) return;
-    if (!canShareFiles()) {
-      window.alert(t("share.unsupported"));
-      return;
-    }
+    if (!state.outputBlob || !canShareFiles()) return;
     const filename = state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`;
     const file = new File([state.outputBlob], filename, { type: "application/epub+zip" });
     try {
