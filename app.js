@@ -169,6 +169,20 @@
         renderReport();
       });
     });
+
+    bindExclusiveMarginOptions();
+  }
+
+  function bindExclusiveMarginOptions() {
+    const reduceMarginsInput = document.getElementById("reduceMargins");
+    const miniMarginsInput = document.getElementById("miniMargins");
+    if (!reduceMarginsInput || !miniMarginsInput) return;
+    reduceMarginsInput.addEventListener("change", () => {
+      if (reduceMarginsInput.checked) miniMarginsInput.checked = false;
+    });
+    miniMarginsInput.addEventListener("change", () => {
+      if (miniMarginsInput.checked) reduceMarginsInput.checked = false;
+    });
   }
 
   function setFatalInterfaceError(message) {
