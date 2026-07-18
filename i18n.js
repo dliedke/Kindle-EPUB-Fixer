@@ -5,27 +5,27 @@
   // htmlLang: valor do atributo lang do documento. dir: direção do texto (ltr/rtl).
   // locale: usado por Intl.NumberFormat. opfLang: valor gravado em dc:language quando ausente.
   const LANGUAGE_META = {
-    en: { native: "English",    htmlLang: "en",    dir: "ltr", locale: "en-US", opfLang: "en" },
-    zh: { native: "中文",        htmlLang: "zh-CN", dir: "ltr", locale: "zh-CN", opfLang: "zh" },
-    hi: { native: "हिन्दी",       htmlLang: "hi",    dir: "ltr", locale: "hi-IN", opfLang: "hi" },
-    es: { native: "Español",    htmlLang: "es",    dir: "ltr", locale: "es-ES", opfLang: "es" },
-    fr: { native: "Français",   htmlLang: "fr",    dir: "ltr", locale: "fr-FR", opfLang: "fr" },
-    ar: { native: "العربية",     htmlLang: "ar",    dir: "rtl", locale: "ar",    opfLang: "ar" },
-    bn: { native: "বাংলা",       htmlLang: "bn",    dir: "ltr", locale: "bn-BD", opfLang: "bn" },
-    pt: { native: "Português",  htmlLang: "pt-BR", dir: "ltr", locale: "pt-BR", opfLang: "pt-BR" },
-    ru: { native: "Русский",    htmlLang: "ru",    dir: "ltr", locale: "ru-RU", opfLang: "ru" },
-    ur: { native: "اردو",        htmlLang: "ur",    dir: "rtl", locale: "ur",    opfLang: "ur" },
-    id: { native: "Indonesia",  htmlLang: "id",    dir: "ltr", locale: "id-ID", opfLang: "id" },
-    de: { native: "Deutsch",    htmlLang: "de",    dir: "ltr", locale: "de-DE", opfLang: "de" },
-    nl: { native: "Nederlands", htmlLang: "nl",    dir: "ltr", locale: "nl-NL", opfLang: "nl" },
-    ja: { native: "日本語",      htmlLang: "ja",    dir: "ltr", locale: "ja-JP", opfLang: "ja" },
-    tr: { native: "Türkçe",     htmlLang: "tr",    dir: "ltr", locale: "tr-TR", opfLang: "tr" },
-    ko: { native: "한국어",      htmlLang: "ko",    dir: "ltr", locale: "ko-KR", opfLang: "ko" },
-    vi: { native: "Tiếng Việt", htmlLang: "vi",    dir: "ltr", locale: "vi-VN", opfLang: "vi" },
-    it: { native: "Italiano",   htmlLang: "it",    dir: "ltr", locale: "it-IT", opfLang: "it" },
-    mr: { native: "मराठी",       htmlLang: "mr",    dir: "ltr", locale: "mr-IN", opfLang: "mr" },
-    te: { native: "తెలుగు",      htmlLang: "te",    dir: "ltr", locale: "te-IN", opfLang: "te" },
-    ta: { native: "தமிழ்",       htmlLang: "ta",    dir: "ltr", locale: "ta-IN", opfLang: "ta" }
+    en: { native: "English",    english: "English",    htmlLang: "en",    dir: "ltr", locale: "en-US", opfLang: "en" },
+    zh: { native: "中文",        english: "Chinese",    htmlLang: "zh-CN", dir: "ltr", locale: "zh-CN", opfLang: "zh" },
+    hi: { native: "हिन्दी",       english: "Hindi",      htmlLang: "hi",    dir: "ltr", locale: "hi-IN", opfLang: "hi" },
+    es: { native: "Español",    english: "Spanish",    htmlLang: "es",    dir: "ltr", locale: "es-ES", opfLang: "es" },
+    fr: { native: "Français",   english: "French",     htmlLang: "fr",    dir: "ltr", locale: "fr-FR", opfLang: "fr" },
+    ar: { native: "العربية",     english: "Arabic",     htmlLang: "ar",    dir: "rtl", locale: "ar",    opfLang: "ar" },
+    bn: { native: "বাংলা",       english: "Bengali",    htmlLang: "bn",    dir: "ltr", locale: "bn-BD", opfLang: "bn" },
+    pt: { native: "Português",  english: "Portuguese", htmlLang: "pt-BR", dir: "ltr", locale: "pt-BR", opfLang: "pt-BR" },
+    ru: { native: "Русский",    english: "Russian",    htmlLang: "ru",    dir: "ltr", locale: "ru-RU", opfLang: "ru" },
+    ur: { native: "اردو",        english: "Urdu",       htmlLang: "ur",    dir: "rtl", locale: "ur",    opfLang: "ur" },
+    id: { native: "Indonesia",  english: "Indonesian", htmlLang: "id",    dir: "ltr", locale: "id-ID", opfLang: "id" },
+    de: { native: "Deutsch",    english: "German",     htmlLang: "de",    dir: "ltr", locale: "de-DE", opfLang: "de" },
+    nl: { native: "Nederlands", english: "Dutch",      htmlLang: "nl",    dir: "ltr", locale: "nl-NL", opfLang: "nl" },
+    ja: { native: "日本語",      english: "Japanese",   htmlLang: "ja",    dir: "ltr", locale: "ja-JP", opfLang: "ja" },
+    tr: { native: "Türkçe",     english: "Turkish",    htmlLang: "tr",    dir: "ltr", locale: "tr-TR", opfLang: "tr" },
+    ko: { native: "한국어",      english: "Korean",     htmlLang: "ko",    dir: "ltr", locale: "ko-KR", opfLang: "ko" },
+    vi: { native: "Tiếng Việt", english: "Vietnamese", htmlLang: "vi",    dir: "ltr", locale: "vi-VN", opfLang: "vi" },
+    it: { native: "Italiano",   english: "Italian",    htmlLang: "it",    dir: "ltr", locale: "it-IT", opfLang: "it" },
+    mr: { native: "मराठी",       english: "Marathi",    htmlLang: "mr",    dir: "ltr", locale: "mr-IN", opfLang: "mr" },
+    te: { native: "తెలుగు",      english: "Telugu",     htmlLang: "te",    dir: "ltr", locale: "te-IN", opfLang: "te" },
+    ta: { native: "தமிழ்",       english: "Tamil",      htmlLang: "ta",    dir: "ltr", locale: "ta-IN", opfLang: "ta" }
   };
 
   const SUPPORTED_LANGUAGES = Object.keys(LANGUAGE_META);
@@ -4273,7 +4273,7 @@
   }
 
   function getLanguages() {
-    return SUPPORTED_LANGUAGES.map((code) => ({ code, native: LANGUAGE_META[code].native }));
+    return SUPPORTED_LANGUAGES.map((code) => ({ code, native: LANGUAGE_META[code].native, english: LANGUAGE_META[code].english }));
   }
 
   function initialize() {

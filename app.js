@@ -179,10 +179,10 @@
     const languages = i18n?.getLanguages?.();
     if (!dom.languageSelect || !Array.isArray(languages) || !languages.length) return;
     dom.languageSelect.replaceChildren();
-    for (const { code, native } of languages) {
+    for (const { code, native, english } of languages) {
       const option = document.createElement("option");
       option.value = code;
-      option.textContent = native;
+      option.textContent = english && english !== native ? `${native} (${english})` : native;
       dom.languageSelect.appendChild(option);
     }
   }
