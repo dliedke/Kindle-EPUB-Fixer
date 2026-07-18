@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#111827">
+  <title>Kindle EPUB Fixer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="background-orb orb-one"></div>
+  <div class="background-orb orb-two"></div>
+
+  <main class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow" data-i18n="hero.eyebrow">100% local · nenhum upload</p>
+        <h1>Kindle EPUB Fixer</h1>
+        <p class="hero-copy" data-i18n="hero.copy">Analisa, corrige e reconstrói arquivos EPUB para aumentar a compatibilidade com o Send to Kindle.</p>
+      </div>
+      <div class="header-actions">
+        <label class="language-control" for="languageSelect">
+          <span aria-hidden="true">🌐</span>
+          <span class="sr-only" data-i18n="language.label">Idioma</span>
+          <select id="languageSelect" data-i18n-aria-label="language.label">
+            <option value="pt">Português</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+        <div class="privacy-badge" data-i18n-title="privacy.title" title="O arquivo é processado somente no seu navegador.">
+          <span aria-hidden="true">🔒</span>
+          <span data-i18n="privacy.label">Processamento local</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="panel upload-panel" aria-labelledby="upload-title">
+      <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-describedby="drop-help">
+        <input id="fileInput" type="file" accept=".epub,application/epub+zip" hidden>
+        <div class="drop-icon" aria-hidden="true">↥</div>
+        <h2 id="upload-title" data-i18n="upload.title">Solte o EPUB aqui</h2>
+        <p id="drop-help" data-i18n="upload.help">ou clique para escolher um arquivo</p>
+        <span class="file-limit" data-i18n="upload.limit">Recomendado: até 500 MB</span>
+      </div>
+
+      <div id="selectedFile" class="selected-file hidden" aria-live="polite">
+        <div class="file-symbol" aria-hidden="true">EPUB</div>
+        <div class="file-details">
+          <strong id="fileName"></strong>
+          <span id="fileSize"></span>
+        </div>
+        <button id="removeFileButton" class="icon-button" type="button" data-i18n-aria-label="upload.remove" aria-label="Remover arquivo">×</button>
+      </div>
+    </section>
+
+    <section class="workspace-grid">
+      <section class="panel settings-panel" aria-labelledby="settings-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker" data-i18n="settings.kicker">Configuração</p>
+            <h2 id="settings-title" data-i18n="settings.title">Correções</h2>
+          </div>
+          <button id="recommendedButton" class="text-button" type="button" data-i18n="settings.recommended">Usar recomendadas</button>
+        </div>
+
+        <fieldset>
+          <legend data-i18n="settings.structure">Estrutura do EPUB</legend>
+          <label class="switch-row">
+            <span><strong data-i18n="option.fixZip.title">Reconstruir pacote ZIP</strong><small data-i18n="option.fixZip.description">Coloca o mimetype primeiro e sem compressão.</small></span>
+            <input id="fixZip" type="checkbox" checked disabled>
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+          <label class="switch-row">
+            <span><strong data-i18n="option.normalizePaths.title">Normalizar nomes e caminhos</strong><small data-i18n="option.normalizePaths.description">Corrige espaços, acentos problemáticos, porcentagens, barras e caixa.</small></span>
+            <input id="normalizePaths" type="checkbox" checked>
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+          <label class="switch-row">
+            <span><strong data-i18n="option.removeJunk.title">Remover arquivos inúteis</strong><small data-i18n="option.removeJunk.description">Exclui lixo de macOS, Windows e editores.</small></span>
+            <input id="removeJunk" type="checkbox" checked>
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend data-i18n="settings.content">Pacote e conteúdo</legend>
+          <label class="switch-row">
+            <span><strong data-i18n="option.repairPackage.title">Reparar OPF, manifesto e spine</strong><small data-i18n="option.repairPackage.description">Corrige IDs, itens ausentes, media types e ordem de leitura.</small></span>
+            <input id="repairPackage" type="checkbox" checked>
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+          <label class="switch-row">
+            <span><strong data-i18n="option.repairNavigation.title">Reparar sumários NAV e NCX</strong><small data-i18n="option.repairNavigation.description">Gera navegação compatível quando estiver ausente ou vazia.</small></span>
+            <input id="repairNavigation" type="checkbox" checked>
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+          <label class="switch-row">
+            <span><strong data-i18n="option.repairText.title">Corrigir XHTML, XML e CSS</strong><small data-i18n="option.repairText.description">Remove caracteres inválidos, BOMs e referências quebradas.</small></span>
+            <input id="repairText" type="checkbox" checked>
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+          <label class="switch-row">
+            <span><strong data-i18n="option.repairCover.title">Detectar e configurar capa</strong><small data-i18n="option.repairCover.description">Corrige a propriedade cover-image e o metadado legado.</small></span>
+            <input id="repairCover" type="checkbox" checked>
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+        </fieldset>
+
+        <details class="advanced-options">
+          <summary data-i18n="advanced.title">Opções avançadas</summary>
+          <label class="check-row">
+            <input id="addUnlisted" type="checkbox" checked>
+            <span><strong data-i18n="option.addUnlisted.title">Adicionar arquivos não listados ao manifesto</strong><small data-i18n="option.addUnlisted.description">Inclui XHTML, CSS, imagens e fontes encontrados no pacote.</small></span>
+          </label>
+          <label class="check-row">
+            <input id="removeMissing" type="checkbox" checked>
+            <span><strong data-i18n="option.removeMissing.title">Remover referências sem arquivo</strong><small data-i18n="option.removeMissing.description">Evita falha por itens do manifesto que não existem.</small></span>
+          </label>
+          <label class="check-row">
+            <input id="stripScripts" type="checkbox">
+            <span><strong data-i18n="option.stripScripts.title">Remover JavaScript do livro</strong><small data-i18n="option.stripScripts.description">Pode ajudar em EPUBs interativos rejeitados pelo Kindle.</small></span>
+          </label>
+        </details>
+      </section>
+
+      <section class="panel action-panel" aria-labelledby="action-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker" data-i18n="action.kicker">Execução</p>
+            <h2 id="action-title" data-i18n="action.title">Diagnóstico e reparo</h2>
+          </div>
+        </div>
+
+        <div id="idleState" class="state-card">
+          <div class="state-icon" aria-hidden="true">✓</div>
+          <h3 data-i18n="idle.title">Pronto para começar</h3>
+          <p data-i18n="idle.description">Selecione um EPUB. O diagnóstico mostrará o que foi encontrado e o que pôde ser corrigido.</p>
+        </div>
+
+        <div id="progressState" class="progress-state hidden" aria-live="polite">
+          <div class="progress-header">
+            <strong id="progressLabel" data-i18n="progress.initialLabel">Lendo arquivo…</strong>
+            <span id="progressPercent">0%</span>
+          </div>
+          <div class="progress-track" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div>
+          <p id="progressDetail" data-i18n="progress.initialDetail">Preparando análise.</p>
+        </div>
+
+        <div id="resultState" class="result-state hidden" aria-live="polite">
+          <div class="summary-grid">
+            <div class="summary-card"><span id="errorCount">0</span><small data-i18n="summary.errors">erros</small></div>
+            <div class="summary-card"><span id="warningCount">0</span><small data-i18n="summary.warnings">alertas</small></div>
+            <div class="summary-card"><span id="fixedCount">0</span><small data-i18n="summary.fixes">correções</small></div>
+            <div class="summary-card"><span id="fileCount">0</span><small data-i18n="summary.files">arquivos</small></div>
+          </div>
+
+          <div class="result-banner" id="resultBanner">
+            <strong id="resultTitle"></strong>
+            <span id="resultText"></span>
+          </div>
+
+          <div class="report-toolbar">
+            <div class="filter-group" role="group" data-i18n-aria-label="report.filterLabel" aria-label="Filtrar relatório">
+              <button class="filter-button active" data-filter="all" type="button" data-i18n="report.all">Todos</button>
+              <button class="filter-button" data-filter="error" type="button" data-i18n="report.errors">Erros</button>
+              <button class="filter-button" data-filter="warning" type="button" data-i18n="report.warnings">Alertas</button>
+              <button class="filter-button" data-filter="fixed" type="button" data-i18n="report.fixed">Corrigidos</button>
+            </div>
+            <button id="downloadReportButton" class="text-button" type="button" data-i18n="report.download">Baixar relatório</button>
+          </div>
+
+          <div id="reportList" class="report-list"></div>
+        </div>
+
+        <div class="action-buttons">
+          <button id="repairButton" class="primary-button" type="button" disabled>
+            <span aria-hidden="true">⚙</span>
+            <span data-i18n="button.repair">Analisar e corrigir EPUB</span>
+          </button>
+          <button id="downloadButton" class="secondary-button hidden" type="button">
+            <span aria-hidden="true">↓</span>
+            <span data-i18n="button.download">Baixar EPUB corrigido</span>
+          </button>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel notes-panel">
+      <h2 data-i18n="notes.title">O que esta ferramenta verifica</h2>
+      <div class="notes-grid">
+        <article><strong data-i18n="notes.zip.title">ZIP e mimetype</strong><p data-i18n="notes.zip.description">Ordem, compressão, assinatura do pacote e arquivos duplicados.</p></article>
+        <article><strong data-i18n="notes.opf.title">Container e OPF</strong><p data-i18n="notes.opf.description">Rootfile, metadados, manifesto, spine, IDs e tipos MIME.</p></article>
+        <article><strong data-i18n="notes.links.title">Links internos</strong><p data-i18n="notes.links.description">Referências relativas, URLs codificadas, diferenças de caixa e arquivos renomeados.</p></article>
+        <article><strong data-i18n="notes.kindle.title">Conteúdo Kindle</strong><p data-i18n="notes.kindle.description">Capa, NAV, NCX, XHTML, XML, CSS, imagens, fontes e arquivos indesejados.</p></article>
+      </div>
+      <p class="important-note"><strong data-i18n="notes.importantLabel">Importante:</strong> <span data-i18n="notes.importantText">EPUBs protegidos por DRM ou com conteúdo criptografado são diagnosticados, mas não são alterados. Esta ferramenta não remove DRM.</span></p>
+    </section>
+
+    <footer>
+      <span>Kindle EPUB Fixer</span>
+      <span data-i18n="footer.local">Funciona inteiramente no navegador.</span>
+    </footer>
+  </main>
+
+  <script src="vendor/jszip.min.js"></script>
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
