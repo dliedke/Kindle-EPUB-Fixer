@@ -104,7 +104,7 @@
   };
 
   const optionIds = [
-    "reduceMargins", "normalizePaths", "removeJunk", "repairPackage", "repairNavigation", "repairText",
+    "reduceMargins", "miniMargins", "normalizePaths", "removeJunk", "repairPackage", "repairNavigation", "repairText",
     "repairCover", "addUnlisted", "removeMissing", "stripScripts"
   ];
 
@@ -236,6 +236,7 @@
   function useRecommendedOptions() {
     const recommended = {
       reduceMargins: false,
+      miniMargins: false,
       normalizePaths: true,
       removeJunk: true,
       repairPackage: true,
@@ -412,7 +413,7 @@
       await updateProgress(t("progress.container.label"), 47, t("progress.container.detail"));
       repairContainer(contentMap, mappedOpfPath);
 
-      if (options.repairText || options.reduceMargins) {
+      if (options.repairText || options.reduceMargins || options.miniMargins) {
         await updateProgress(t("progress.content.label"), 54, t("progress.content.detail"));
         repairTextDocuments(contentMap, options);
       }
@@ -752,10 +753,14 @@
             text = withoutScripts;
           }
         }
-        if (options.reduceMargins) {
-          const withReducedMargins = applyReducedMargins(text);
+        if (options.miniMargins || options.reduceMargins) {
+          const marginLevel = options.miniMargins ? "mini" : "reduced";
+          const withReducedMargins = applyReducedMargins(text, marginLevel);
           if (withReducedMargins !== text) {
-            addIssue("fixed", "Margens laterais reduzidas neste documento.", path, "MARGINS_REDUCED");
+            const message = marginLevel === "mini"
+              ? "Mini-margens aplicadas neste documento."
+              : "Margens laterais reduzidas neste documento.";
+            addIssue("fixed", message, path, "MARGINS_REDUCED");
             text = withReducedMargins;
           }
         }
@@ -1645,8 +1650,9 @@
     return output;
   }
 
-  function applyReducedMargins(text) {
-    const marginStyle = '<style type="text/css">html,body{margin:0 !important;padding:0 2% !important;}</style>';
+  function applyReducedMargins(text, level = "reduced") {
+    const padding = level === "mini" ? "0" : "0 2%";
+    const marginStyle = `<style type="text/css">html,body{margin:0 !important;padding:${padding} !important;}</style>`;
     if (/<\/head>/i.test(text)) {
       return text.replace(/<\/head>/i, `${marginStyle}</head>`);
     }
