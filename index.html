@@ -132,6 +132,11 @@
         <fieldset>
           <legend data-i18n="settings.structure">Estrutura do EPUB</legend>
           <label class="switch-row">
+            <span><strong data-i18n="option.reduceMargins.title">Diminuir margens laterais</strong><small data-i18n="option.reduceMargins.description">Reduz o espaço em branco nas laterais do texto para aproveitar melhor a tela.</small></span>
+            <input id="reduceMargins" type="checkbox">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+          <label class="switch-row">
             <span><strong data-i18n="option.fixZip.title">Reconstruir pacote ZIP</strong><small data-i18n="option.fixZip.description">Coloca o mimetype primeiro e sem compressão.</small></span>
             <input id="fixZip" type="checkbox" checked disabled>
             <span class="switch" aria-hidden="true"></span>
@@ -185,10 +190,6 @@
           <label class="check-row">
             <input id="stripScripts" type="checkbox">
             <span><strong data-i18n="option.stripScripts.title">Remover JavaScript do livro</strong><small data-i18n="option.stripScripts.description">Pode ajudar em EPUBs interativos rejeitados pelo Kindle.</small></span>
-          </label>
-          <label class="check-row">
-            <input id="reduceMargins" type="checkbox">
-            <span><strong data-i18n="option.reduceMargins.title">Diminuir margens laterais</strong><small data-i18n="option.reduceMargins.description">Reduz o espaço em branco nas laterais do texto para aproveitar melhor a tela.</small></span>
           </label>
         </details>
       </div>

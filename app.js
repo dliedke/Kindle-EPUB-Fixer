@@ -102,8 +102,8 @@
   };
 
   const optionIds = [
-    "normalizePaths", "removeJunk", "repairPackage", "repairNavigation", "repairText",
-    "repairCover", "addUnlisted", "removeMissing", "stripScripts", "reduceMargins"
+    "reduceMargins", "normalizePaths", "removeJunk", "repairPackage", "repairNavigation", "repairText",
+    "repairCover", "addUnlisted", "removeMissing", "stripScripts"
   ];
 
   const state = {
@@ -231,6 +231,7 @@
 
   function useRecommendedOptions() {
     const recommended = {
+      reduceMargins: false,
       normalizePaths: true,
       removeJunk: true,
       repairPackage: true,
@@ -239,8 +240,7 @@
       repairCover: true,
       addUnlisted: true,
       removeMissing: true,
-      stripScripts: false,
-      reduceMargins: false
+      stripScripts: false
     };
     for (const [id, checked] of Object.entries(recommended)) {
       const element = document.getElementById(id);
