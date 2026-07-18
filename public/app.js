@@ -89,6 +89,7 @@
     repairButton: document.getElementById("repairButton"),
     downloadButton: document.getElementById("downloadButton"),
     downloadReportButton: document.getElementById("downloadReportButton"),
+    reportDetails: document.getElementById("reportDetails"),
     reportList: document.getElementById("reportList"),
     errorCount: document.getElementById("errorCount"),
     warningCount: document.getElementById("warningCount"),
@@ -1273,6 +1274,7 @@
       dom.resultText.textContent = t("result.errorText");
       dom.downloadButton.classList.add("hidden");
     }
+    if (dom.reportDetails) dom.reportDetails.open = !hasOutput || stats.errors > 0;
     renderReport();
   }
 

@@ -54,13 +54,74 @@
       </div>
     </section>
 
-    <section class="workspace-grid">
-      <section class="panel settings-panel" aria-labelledby="settings-title">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker" data-i18n="settings.kicker">Configuração</p>
-            <h2 id="settings-title" data-i18n="settings.title">Correções</h2>
+    <section class="panel action-panel">
+      <div id="idleState" class="state-card">
+        <div class="state-icon" aria-hidden="true">✓</div>
+        <h3 data-i18n="idle.title">Pronto para começar</h3>
+        <p data-i18n="idle.description">Selecione um EPUB. O diagnóstico mostrará o que foi encontrado e o que pôde ser corrigido.</p>
+      </div>
+
+      <div id="progressState" class="progress-state hidden" aria-live="polite">
+        <div class="progress-header">
+          <strong id="progressLabel" data-i18n="progress.initialLabel">Lendo arquivo…</strong>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-track" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div>
+        <p id="progressDetail" data-i18n="progress.initialDetail">Preparando análise.</p>
+      </div>
+
+      <div id="resultState" class="result-state hidden" aria-live="polite">
+        <div class="summary-grid">
+          <div class="summary-card"><span id="errorCount">0</span><small data-i18n="summary.errors">erros</small></div>
+          <div class="summary-card"><span id="warningCount">0</span><small data-i18n="summary.warnings">alertas</small></div>
+          <div class="summary-card"><span id="fixedCount">0</span><small data-i18n="summary.fixes">correções</small></div>
+          <div class="summary-card"><span id="fileCount">0</span><small data-i18n="summary.files">arquivos</small></div>
+        </div>
+
+        <div class="result-banner" id="resultBanner">
+          <strong id="resultTitle"></strong>
+          <span id="resultText"></span>
+        </div>
+
+        <details id="reportDetails" class="report-details">
+          <summary data-i18n="report.viewDetails">Ver relatório detalhado</summary>
+          <div class="report-toolbar">
+            <div class="filter-group" role="group" data-i18n-aria-label="report.filterLabel" aria-label="Filtrar relatório">
+              <button class="filter-button active" data-filter="all" type="button" data-i18n="report.all">Todos</button>
+              <button class="filter-button" data-filter="error" type="button" data-i18n="report.errors">Erros</button>
+              <button class="filter-button" data-filter="warning" type="button" data-i18n="report.warnings">Alertas</button>
+              <button class="filter-button" data-filter="fixed" type="button" data-i18n="report.fixed">Corrigidos</button>
+            </div>
+            <button id="downloadReportButton" class="text-button" type="button" data-i18n="report.download">Baixar relatório</button>
           </div>
+
+          <div id="reportList" class="report-list"></div>
+        </details>
+      </div>
+
+      <div class="action-buttons">
+        <button id="repairButton" class="primary-button" type="button" disabled>
+          <span aria-hidden="true">⚙</span>
+          <span data-i18n="button.repair">Analisar e corrigir EPUB</span>
+        </button>
+        <button id="downloadButton" class="secondary-button hidden" type="button">
+          <span aria-hidden="true">↓</span>
+          <span data-i18n="button.download">Baixar EPUB corrigido</span>
+        </button>
+      </div>
+    </section>
+
+    <details class="panel collapsible-panel settings-panel" aria-labelledby="settings-title">
+      <summary>
+        <div>
+          <p class="section-kicker" data-i18n="settings.kicker">Configuração</p>
+          <h2 id="settings-title" data-i18n="settings.title">Correções</h2>
+        </div>
+        <small class="collapsible-hint" data-i18n="settings.hint">Os padrões recomendados já estão ativos</small>
+      </summary>
+
+      <div class="collapsible-body">
+        <div class="collapsible-body-header">
           <button id="recommendedButton" class="text-button" type="button" data-i18n="settings.recommended">Usar recomendadas</button>
         </div>
 
@@ -122,80 +183,25 @@
             <span><strong data-i18n="option.stripScripts.title">Remover JavaScript do livro</strong><small data-i18n="option.stripScripts.description">Pode ajudar em EPUBs interativos rejeitados pelo Kindle.</small></span>
           </label>
         </details>
-      </section>
-
-      <section class="panel action-panel" aria-labelledby="action-title">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker" data-i18n="action.kicker">Execução</p>
-            <h2 id="action-title" data-i18n="action.title">Diagnóstico e reparo</h2>
-          </div>
-        </div>
-
-        <div id="idleState" class="state-card">
-          <div class="state-icon" aria-hidden="true">✓</div>
-          <h3 data-i18n="idle.title">Pronto para começar</h3>
-          <p data-i18n="idle.description">Selecione um EPUB. O diagnóstico mostrará o que foi encontrado e o que pôde ser corrigido.</p>
-        </div>
-
-        <div id="progressState" class="progress-state hidden" aria-live="polite">
-          <div class="progress-header">
-            <strong id="progressLabel" data-i18n="progress.initialLabel">Lendo arquivo…</strong>
-            <span id="progressPercent">0%</span>
-          </div>
-          <div class="progress-track" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div>
-          <p id="progressDetail" data-i18n="progress.initialDetail">Preparando análise.</p>
-        </div>
-
-        <div id="resultState" class="result-state hidden" aria-live="polite">
-          <div class="summary-grid">
-            <div class="summary-card"><span id="errorCount">0</span><small data-i18n="summary.errors">erros</small></div>
-            <div class="summary-card"><span id="warningCount">0</span><small data-i18n="summary.warnings">alertas</small></div>
-            <div class="summary-card"><span id="fixedCount">0</span><small data-i18n="summary.fixes">correções</small></div>
-            <div class="summary-card"><span id="fileCount">0</span><small data-i18n="summary.files">arquivos</small></div>
-          </div>
-
-          <div class="result-banner" id="resultBanner">
-            <strong id="resultTitle"></strong>
-            <span id="resultText"></span>
-          </div>
-
-          <div class="report-toolbar">
-            <div class="filter-group" role="group" data-i18n-aria-label="report.filterLabel" aria-label="Filtrar relatório">
-              <button class="filter-button active" data-filter="all" type="button" data-i18n="report.all">Todos</button>
-              <button class="filter-button" data-filter="error" type="button" data-i18n="report.errors">Erros</button>
-              <button class="filter-button" data-filter="warning" type="button" data-i18n="report.warnings">Alertas</button>
-              <button class="filter-button" data-filter="fixed" type="button" data-i18n="report.fixed">Corrigidos</button>
-            </div>
-            <button id="downloadReportButton" class="text-button" type="button" data-i18n="report.download">Baixar relatório</button>
-          </div>
-
-          <div id="reportList" class="report-list"></div>
-        </div>
-
-        <div class="action-buttons">
-          <button id="repairButton" class="primary-button" type="button" disabled>
-            <span aria-hidden="true">⚙</span>
-            <span data-i18n="button.repair">Analisar e corrigir EPUB</span>
-          </button>
-          <button id="downloadButton" class="secondary-button hidden" type="button">
-            <span aria-hidden="true">↓</span>
-            <span data-i18n="button.download">Baixar EPUB corrigido</span>
-          </button>
-        </div>
-      </section>
-    </section>
-
-    <section class="panel notes-panel">
-      <h2 data-i18n="notes.title">O que esta ferramenta verifica</h2>
-      <div class="notes-grid">
-        <article><strong data-i18n="notes.zip.title">ZIP e mimetype</strong><p data-i18n="notes.zip.description">Ordem, compressão, assinatura do pacote e arquivos duplicados.</p></article>
-        <article><strong data-i18n="notes.opf.title">Container e OPF</strong><p data-i18n="notes.opf.description">Rootfile, metadados, manifesto, spine, IDs e tipos MIME.</p></article>
-        <article><strong data-i18n="notes.links.title">Links internos</strong><p data-i18n="notes.links.description">Referências relativas, URLs codificadas, diferenças de caixa e arquivos renomeados.</p></article>
-        <article><strong data-i18n="notes.kindle.title">Conteúdo Kindle</strong><p data-i18n="notes.kindle.description">Capa, NAV, NCX, XHTML, XML, CSS, imagens, fontes e arquivos indesejados.</p></article>
       </div>
-      <p class="important-note"><strong data-i18n="notes.importantLabel">Importante:</strong> <span data-i18n="notes.importantText">EPUBs protegidos por DRM ou com conteúdo criptografado são diagnosticados, mas não são alterados. Esta ferramenta não remove DRM.</span></p>
-    </section>
+    </details>
+
+    <details class="panel collapsible-panel notes-panel">
+      <summary>
+        <div>
+          <h2 data-i18n="notes.title">O que esta ferramenta verifica</h2>
+        </div>
+      </summary>
+      <div class="collapsible-body">
+        <div class="notes-grid">
+          <article><strong data-i18n="notes.zip.title">ZIP e mimetype</strong><p data-i18n="notes.zip.description">Ordem, compressão, assinatura do pacote e arquivos duplicados.</p></article>
+          <article><strong data-i18n="notes.opf.title">Container e OPF</strong><p data-i18n="notes.opf.description">Rootfile, metadados, manifesto, spine, IDs e tipos MIME.</p></article>
+          <article><strong data-i18n="notes.links.title">Links internos</strong><p data-i18n="notes.links.description">Referências relativas, URLs codificadas, diferenças de caixa e arquivos renomeados.</p></article>
+          <article><strong data-i18n="notes.kindle.title">Conteúdo Kindle</strong><p data-i18n="notes.kindle.description">Capa, NAV, NCX, XHTML, XML, CSS, imagens, fontes e arquivos indesejados.</p></article>
+        </div>
+        <p class="important-note"><strong data-i18n="notes.importantLabel">Importante:</strong> <span data-i18n="notes.importantText">EPUBs protegidos por DRM ou com conteúdo criptografado são diagnosticados, mas não são alterados. Esta ferramenta não remove DRM.</span></p>
+      </div>
+    </details>
 
     <footer>
       <span>Kindle EPUB Fixer</span>
