@@ -88,7 +88,6 @@
     progressDetail: document.getElementById("progressDetail"),
     repairButton: document.getElementById("repairButton"),
     downloadButton: document.getElementById("downloadButton"),
-    shareButton: document.getElementById("shareButton"),
     downloadReportButton: document.getElementById("downloadReportButton"),
     reportList: document.getElementById("reportList"),
     errorCount: document.getElementById("errorCount"),
@@ -143,7 +142,6 @@
     dom.recommendedButton.addEventListener("click", useRecommendedOptions);
     dom.repairButton.addEventListener("click", repairSelectedFile);
     dom.downloadButton.addEventListener("click", downloadOutput);
-    dom.shareButton.addEventListener("click", shareOutput);
     dom.downloadReportButton.addEventListener("click", downloadReport);
 
     for (const eventName of ["dragenter", "dragover"]) {
@@ -208,7 +206,6 @@
     dom.selectedFile.classList.remove("hidden");
     dom.repairButton.disabled = false;
     dom.downloadButton.classList.add("hidden");
-    dom.shareButton.classList.add("hidden");
     showIdleState();
   }
 
@@ -225,7 +222,6 @@
     dom.selectedFile.classList.add("hidden");
     dom.repairButton.disabled = true;
     dom.downloadButton.classList.add("hidden");
-    dom.shareButton.classList.add("hidden");
     showIdleState();
   }
 
@@ -287,7 +283,6 @@
     dom.repairButton.disabled = true;
     if (dom.languageSelect) dom.languageSelect.disabled = true;
     dom.downloadButton.classList.add("hidden");
-    dom.shareButton.classList.add("hidden");
     const options = readOptions();
 
     try {
@@ -1267,19 +1262,16 @@
       dom.resultTitle.textContent = t("result.successTitle");
       dom.resultText.textContent = t("result.successText");
       dom.downloadButton.classList.remove("hidden");
-      dom.shareButton.classList.toggle("hidden", !canShareFiles());
     } else if (hasOutput) {
       dom.resultBanner.classList.add("warning");
       dom.resultTitle.textContent = t("result.warningTitle");
       dom.resultText.textContent = t("result.warningText");
       dom.downloadButton.classList.remove("hidden");
-      dom.shareButton.classList.toggle("hidden", !canShareFiles());
     } else {
       dom.resultBanner.classList.add("error");
       dom.resultTitle.textContent = t("result.errorTitle");
       dom.resultText.textContent = t("result.errorText");
       dom.downloadButton.classList.add("hidden");
-      dom.shareButton.classList.add("hidden");
     }
     renderReport();
   }
@@ -1397,59 +1389,6 @@
     triggerBlobDownload(state.outputBlob, state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`);
   }
 
-  function isMobileDevice() {
-    if (typeof navigator === "undefined") return false;
-    if (navigator.userAgentData && typeof navigator.userAgentData.mobile === "boolean") {
-      return navigator.userAgentData.mobile;
-    }
-    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
-  }
-
-  function canShareFiles() {
-    if (typeof navigator === "undefined" || typeof navigator.share !== "function") return false;
-    // Mobile OS share sheets are generally more permissive than the desktop
-    // Web Share implementation; resolve real support at share time instead
-    // of pre-filtering here, since a strict probe hides the button on
-    // devices that would actually be able to share the file.
-    if (isMobileDevice()) return true;
-    if (typeof navigator.canShare !== "function") return false;
-    try {
-      const probe = new File([""], "probe.epub", { type: "application/epub+zip" });
-      return navigator.canShare({ files: [probe] });
-    } catch {
-      return false;
-    }
-  }
-
-  async function tryShareFile(file, text) {
-    if (typeof navigator.canShare === "function" && !navigator.canShare({ files: [file] })) {
-      return false;
-    }
-    try {
-      await navigator.share({ files: [file], title: file.name, text });
-      return true;
-    } catch (error) {
-      if (error?.name === "AbortError") return true;
-      return false;
-    }
-  }
-
-  async function shareOutput() {
-    if (!state.outputBlob || !canShareFiles()) return;
-    const baseName = (state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`).replace(/\.epub$/i, "");
-
-    const epubFile = new File([state.outputBlob], `${baseName}.epub`, { type: "application/epub+zip" });
-    if (await tryShareFile(epubFile)) return;
-
-    // Some browsers only allow sharing files whose extension is on a fixed
-    // safelist; .epub is often excluded from it while .zip (which an EPUB
-    // technically is) is not, so retry with that extension as a fallback.
-    const zipFile = new File([state.outputBlob], `${baseName}.zip`, { type: "application/zip" });
-    if (await tryShareFile(zipFile, t("share.renameNotice"))) return;
-
-    window.alert(t("share.failed"));
-    downloadOutput();
-  }
 
   function downloadReport() {
     const baseDocument = state.reportDocument || createReportDocument({
