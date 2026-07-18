@@ -89,6 +89,8 @@
     repairButton: document.getElementById("repairButton"),
     downloadButton: document.getElementById("downloadButton"),
     sendToKindleLink: document.getElementById("sendToKindleLink"),
+    filenameField: document.getElementById("filenameField"),
+    outputFilenameInput: document.getElementById("outputFilenameInput"),
     downloadReportButton: document.getElementById("downloadReportButton"),
     reportDetails: document.getElementById("reportDetails"),
     reportList: document.getElementById("reportList"),
@@ -209,6 +211,7 @@
     dom.repairButton.disabled = false;
     dom.downloadButton.classList.add("hidden");
     if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
+    if (dom.filenameField) dom.filenameField.classList.add("hidden");
     showIdleState();
   }
 
@@ -226,6 +229,7 @@
     dom.repairButton.disabled = true;
     dom.downloadButton.classList.add("hidden");
     if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
+    if (dom.filenameField) dom.filenameField.classList.add("hidden");
     showIdleState();
   }
 
@@ -289,6 +293,7 @@
     if (dom.languageSelect) dom.languageSelect.disabled = true;
     dom.downloadButton.classList.add("hidden");
     if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
+    if (dom.filenameField) dom.filenameField.classList.add("hidden");
     const options = readOptions();
 
     try {
@@ -1344,18 +1349,21 @@
       dom.resultText.textContent = t("result.successText");
       dom.downloadButton.classList.remove("hidden");
       if (dom.sendToKindleLink) dom.sendToKindleLink.classList.remove("hidden");
+      showFilenameField();
     } else if (hasOutput) {
       dom.resultBanner.classList.add("warning");
       dom.resultTitle.textContent = t("result.warningTitle");
       dom.resultText.textContent = t("result.warningText");
       dom.downloadButton.classList.remove("hidden");
       if (dom.sendToKindleLink) dom.sendToKindleLink.classList.remove("hidden");
+      showFilenameField();
     } else {
       dom.resultBanner.classList.add("error");
       dom.resultTitle.textContent = t("result.errorTitle");
       dom.resultText.textContent = t("result.errorText");
       dom.downloadButton.classList.add("hidden");
       if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
+      if (dom.filenameField) dom.filenameField.classList.add("hidden");
     }
     if (dom.reportDetails) dom.reportDetails.open = !hasOutput || stats.errors > 0;
     renderReport();
@@ -1469,9 +1477,24 @@
     };
   }
 
+  function showFilenameField() {
+    if (!dom.filenameField || !dom.outputFilenameInput) return;
+    dom.outputFilenameInput.value = state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`;
+    dom.filenameField.classList.remove("hidden");
+  }
+
+  function resolveChosenOutputFilename() {
+    const fallback = state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`;
+    const typed = dom.outputFilenameInput?.value?.trim();
+    if (!typed) return fallback;
+    const withExtension = /\.epub$/i.test(typed) ? typed : `${typed}.epub`;
+    const safe = withExtension.replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, " ").trim();
+    return safe.replace(/^\.+/, "") || fallback;
+  }
+
   function downloadOutput() {
     if (!state.outputBlob) return;
-    triggerBlobDownload(state.outputBlob, state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`);
+    triggerBlobDownload(state.outputBlob, resolveChosenOutputFilename());
   }
 
 
@@ -1491,7 +1514,28 @@
     triggerBlobDownload(blob, `${sanitizeDownloadBase(base)}-${t("filename.reportSuffix")}.json`);
   }
 
-  function triggerBlobDownload(blob, filename) {
+  const SAVE_PICKER_TYPES = {
+    ".epub": { description: "EPUB", accept: { "application/epub+zip": [".epub"] } },
+    ".json": { description: "JSON", accept: { "application/json": [".json"] } }
+  };
+
+  async function triggerBlobDownload(blob, filename) {
+    if (typeof window.showSaveFilePicker === "function") {
+      const extension = filename.slice(filename.lastIndexOf(".")).toLowerCase();
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: SAVE_PICKER_TYPES[extension] ? [SAVE_PICKER_TYPES[extension]] : undefined
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return;
+      } catch (err) {
+        if (err && err.name === "AbortError") return;
+      }
+    }
+
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;

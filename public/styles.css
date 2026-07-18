@@ -301,6 +301,18 @@ legend {
 .result-banner.warning { border-color: rgba(251, 191, 36, 0.24); background: rgba(245, 158, 11, 0.08); }
 .result-banner.error { border-color: rgba(251, 113, 133, 0.25); background: rgba(244, 63, 94, 0.08); }
 .result-banner span { color: var(--muted); font-size: 0.86rem; }
+.filename-field { display: grid; gap: 6px; margin-top: 14px; }
+.filename-field label { font-size: 0.8rem; color: var(--muted); font-weight: 700; }
+.filename-input {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(17, 24, 39, 0.78);
+  color: var(--text);
+  font-size: 0.92rem;
+}
+.filename-input:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
 .report-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 16px 0 10px; }
 .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
 .filter-button { border: 1px solid var(--line); border-radius: 9px; padding: 6px 9px; background: transparent; color: var(--muted); cursor: pointer; font-size: 0.78rem; }
