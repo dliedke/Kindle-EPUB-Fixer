@@ -1397,10 +1397,22 @@
     triggerBlobDownload(state.outputBlob, state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`);
   }
 
-  function canShareFiles() {
-    if (typeof navigator === "undefined" || typeof navigator.share !== "function" || typeof navigator.canShare !== "function") {
-      return false;
+  function isMobileDevice() {
+    if (typeof navigator === "undefined") return false;
+    if (navigator.userAgentData && typeof navigator.userAgentData.mobile === "boolean") {
+      return navigator.userAgentData.mobile;
     }
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+  }
+
+  function canShareFiles() {
+    if (typeof navigator === "undefined" || typeof navigator.share !== "function") return false;
+    // Mobile OS share sheets are generally more permissive than the desktop
+    // Web Share implementation; resolve real support at share time instead
+    // of pre-filtering here, since a strict probe hides the button on
+    // devices that would actually be able to share the file.
+    if (isMobileDevice()) return true;
+    if (typeof navigator.canShare !== "function") return false;
     try {
       const probe = new File([""], "probe.epub", { type: "application/epub+zip" });
       return navigator.canShare({ files: [probe] });
@@ -1409,17 +1421,34 @@
     }
   }
 
+  async function tryShareFile(file, text) {
+    if (typeof navigator.canShare === "function" && !navigator.canShare({ files: [file] })) {
+      return false;
+    }
+    try {
+      await navigator.share({ files: [file], title: file.name, text });
+      return true;
+    } catch (error) {
+      if (error?.name === "AbortError") return true;
+      return false;
+    }
+  }
+
   async function shareOutput() {
     if (!state.outputBlob || !canShareFiles()) return;
-    const filename = state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`;
-    const file = new File([state.outputBlob], filename, { type: "application/epub+zip" });
-    try {
-      await navigator.share({ files: [file], title: filename });
-    } catch (error) {
-      if (error?.name !== "AbortError") {
-        window.alert(t("share.failed"));
-      }
-    }
+    const baseName = (state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`).replace(/\.epub$/i, "");
+
+    const epubFile = new File([state.outputBlob], `${baseName}.epub`, { type: "application/epub+zip" });
+    if (await tryShareFile(epubFile)) return;
+
+    // Some browsers only allow sharing files whose extension is on a fixed
+    // safelist; .epub is often excluded from it while .zip (which an EPUB
+    // technically is) is not, so retry with that extension as a fallback.
+    const zipFile = new File([state.outputBlob], `${baseName}.zip`, { type: "application/zip" });
+    if (await tryShareFile(zipFile, t("share.renameNotice"))) return;
+
+    window.alert(t("share.failed"));
+    downloadOutput();
   }
 
   function downloadReport() {
