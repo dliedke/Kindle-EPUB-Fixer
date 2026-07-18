@@ -331,6 +331,7 @@ legend {
   cursor: pointer;
   font-size: 0.92rem;
   font-weight: 800;
+  text-decoration: none;
   transition: transform 160ms ease, opacity 160ms ease, box-shadow 160ms ease;
 }
 .primary-button { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 13px 28px rgba(79, 70, 229, 0.27); }

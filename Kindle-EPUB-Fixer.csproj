@@ -1,0 +1,424 @@
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6E81D95A-5E4B-FC66-FDB4-677B3A10CC80}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <NoStandardLibraries>false</NoStandardLibraries>
+    <AssemblyName>ClassLibrary</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>Kindle_EPUB_Fixer</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".agents\skills\firebase-ai-logic-basics\references\flutter_setup.md" />
+    <None Include=".agents\skills\firebase-ai-logic-basics\references\ios_setup.md" />
+    <None Include=".agents\skills\firebase-ai-logic-basics\references\usage_patterns_android.md" />
+    <None Include=".agents\skills\firebase-ai-logic-basics\references\usage_patterns_web.md" />
+    <None Include=".agents\skills\firebase-ai-logic-basics\SKILL.md" />
+    <None Include=".agents\skills\firebase-app-hosting-basics\references\cli_commands.md" />
+    <None Include=".agents\skills\firebase-app-hosting-basics\references\configuration.md" />
+    <None Include=".agents\skills\firebase-app-hosting-basics\references\emulation.md" />
+    <None Include=".agents\skills\firebase-app-hosting-basics\SKILL.md" />
+    <None Include=".agents\skills\firebase-auth-basics\references\client_sdk_android.md" />
+    <None Include=".agents\skills\firebase-auth-basics\references\client_sdk_web.md" />
+    <None Include=".agents\skills\firebase-auth-basics\references\flutter_setup.md" />
+    <None Include=".agents\skills\firebase-auth-basics\references\ios_setup.md" />
+    <None Include=".agents\skills\firebase-auth-basics\references\security_rules.md" />
+    <None Include=".agents\skills\firebase-auth-basics\SKILL.md" />
+    <None Include=".agents\skills\firebase-basics\references\android_setup.md" />
+    <None Include=".agents\skills\firebase-basics\references\firebase-cli-guide.md" />
+    <None Include=".agents\skills\firebase-basics\references\firebase-service-init.md" />
+    <None Include=".agents\skills\firebase-basics\references\flutter_setup.md" />
+    <None Include=".agents\skills\firebase-basics\references\ios_setup.md" />
+    <None Include=".agents\skills\firebase-basics\references\local-env-setup.md" />
+    <None Include=".agents\skills\firebase-basics\references\refresh\android_studio.md" />
+    <None Include=".agents\skills\firebase-basics\references\refresh\antigravity.md" />
+    <None Include=".agents\skills\firebase-basics\references\refresh\claude.md" />
+    <None Include=".agents\skills\firebase-basics\references\refresh\gemini-cli.md" />
+    <None Include=".agents\skills\firebase-basics\references\refresh\other-agents.md" />
+    <None Include=".agents\skills\firebase-basics\references\setup\android_studio.md" />
+    <None Include=".agents\skills\firebase-basics\references\setup\antigravity.md" />
+    <None Include=".agents\skills\firebase-basics\references\setup\claude_code.md" />
+    <None Include=".agents\skills\firebase-basics\references\setup\cursor.md" />
+    <None Include=".agents\skills\firebase-basics\references\setup\gemini_cli.md" />
+    <None Include=".agents\skills\firebase-basics\references\setup\github_copilot.md" />
+    <None Include=".agents\skills\firebase-basics\references\setup\other_agents.md" />
+    <None Include=".agents\skills\firebase-basics\references\web_setup.md" />
+    <None Include=".agents\skills\firebase-basics\SKILL.md" />
+    <None Include=".agents\skills\firebase-crashlytics\references\android_setup.md" />
+    <None Include=".agents\skills\firebase-crashlytics\references\ios_setup.md" />
+    <None Include=".agents\skills\firebase-crashlytics\SKILL.md" />
+    <None Include=".agents\skills\firebase-data-connect\examples.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\cloud_functions.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\config.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\data_seeding.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\native_sql.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\operations.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\realtime.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\schema.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\sdk_admin_node.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\sdk_android.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\sdk_flutter.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\sdk_ios.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\sdk_web.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\search.md" />
+    <None Include=".agents\skills\firebase-data-connect\reference\security.md" />
+    <None Include=".agents\skills\firebase-data-connect\SKILL.md" />
+    <None Include=".agents\skills\firebase-data-connect\templates.md" />
+    <None Include=".agents\skills\firebase-firestore\references\enterprise\android_sdk_usage.md" />
+    <None Include=".agents\skills\firebase-firestore\references\enterprise\data_model.md" />
+    <None Include=".agents\skills\firebase-firestore\references\enterprise\flutter_setup.md" />
+    <None Include=".agents\skills\firebase-firestore\references\enterprise\indexes.md" />
+    <None Include=".agents\skills\firebase-firestore\references\enterprise\ios_setup.md" />
+    <None Include=".agents\skills\firebase-firestore\references\enterprise\provisioning.md" />
+    <None Include=".agents\skills\firebase-firestore\references\enterprise\python_sdk_usage.md" />
+    <None Include=".agents\skills\firebase-firestore\references\enterprise\security_rules.md" />
+    <None Include=".agents\skills\firebase-firestore\references\enterprise\web_sdk_usage.md" />
+    <None Include=".agents\skills\firebase-firestore\references\standard\android_sdk_usage.md" />
+    <None Include=".agents\skills\firebase-firestore\references\standard\flutter_setup.md" />
+    <None Include=".agents\skills\firebase-firestore\references\standard\indexes.md" />
+    <None Include=".agents\skills\firebase-firestore\references\standard\ios_setup.md" />
+    <None Include=".agents\skills\firebase-firestore\references\standard\provisioning.md" />
+    <None Include=".agents\skills\firebase-firestore\references\standard\security_rules.md" />
+    <None Include=".agents\skills\firebase-firestore\references\standard\web_sdk_usage.md" />
+    <None Include=".agents\skills\firebase-firestore\SKILL.md" />
+    <None Include=".agents\skills\firebase-hosting-basics\references\configuration.md" />
+    <None Include=".agents\skills\firebase-hosting-basics\references\deploying.md" />
+    <None Include=".agents\skills\firebase-hosting-basics\SKILL.md" />
+    <None Include=".agents\skills\firebase-remote-config-basics\references\android_setup.md" />
+    <None Include=".agents\skills\firebase-remote-config-basics\references\ios_setup.md" />
+    <None Include=".agents\skills\firebase-remote-config-basics\SKILL.md" />
+    <None Include=".agents\skills\firebase-security-rules-auditor\SKILL.md" />
+    <None Include=".agents\skills\xcode-project-setup\scripts\xcode_spm_setup\Package.resolved" />
+    <None Include=".agents\skills\xcode-project-setup\scripts\xcode_spm_setup\Package.swift" />
+    <None Include=".agents\skills\xcode-project-setup\scripts\xcode_spm_setup\Sources\main.swift" />
+    <None Include=".agents\skills\xcode-project-setup\SKILL.md" />
+    <None Include=".claude\skills\firebase-ai-logic-basics\references\flutter_setup.md" />
+    <None Include=".claude\skills\firebase-ai-logic-basics\references\ios_setup.md" />
+    <None Include=".claude\skills\firebase-ai-logic-basics\references\usage_patterns_android.md" />
+    <None Include=".claude\skills\firebase-ai-logic-basics\references\usage_patterns_web.md" />
+    <None Include=".claude\skills\firebase-ai-logic-basics\SKILL.md" />
+    <None Include=".claude\skills\firebase-app-hosting-basics\references\cli_commands.md" />
+    <None Include=".claude\skills\firebase-app-hosting-basics\references\configuration.md" />
+    <None Include=".claude\skills\firebase-app-hosting-basics\references\emulation.md" />
+    <None Include=".claude\skills\firebase-app-hosting-basics\SKILL.md" />
+    <None Include=".claude\skills\firebase-auth-basics\references\client_sdk_android.md" />
+    <None Include=".claude\skills\firebase-auth-basics\references\client_sdk_web.md" />
+    <None Include=".claude\skills\firebase-auth-basics\references\flutter_setup.md" />
+    <None Include=".claude\skills\firebase-auth-basics\references\ios_setup.md" />
+    <None Include=".claude\skills\firebase-auth-basics\references\security_rules.md" />
+    <None Include=".claude\skills\firebase-auth-basics\SKILL.md" />
+    <None Include=".claude\skills\firebase-basics\references\android_setup.md" />
+    <None Include=".claude\skills\firebase-basics\references\firebase-cli-guide.md" />
+    <None Include=".claude\skills\firebase-basics\references\firebase-service-init.md" />
+    <None Include=".claude\skills\firebase-basics\references\flutter_setup.md" />
+    <None Include=".claude\skills\firebase-basics\references\ios_setup.md" />
+    <None Include=".claude\skills\firebase-basics\references\local-env-setup.md" />
+    <None Include=".claude\skills\firebase-basics\references\refresh\android_studio.md" />
+    <None Include=".claude\skills\firebase-basics\references\refresh\antigravity.md" />
+    <None Include=".claude\skills\firebase-basics\references\refresh\claude.md" />
+    <None Include=".claude\skills\firebase-basics\references\refresh\gemini-cli.md" />
+    <None Include=".claude\skills\firebase-basics\references\refresh\other-agents.md" />
+    <None Include=".claude\skills\firebase-basics\references\setup\android_studio.md" />
+    <None Include=".claude\skills\firebase-basics\references\setup\antigravity.md" />
+    <None Include=".claude\skills\firebase-basics\references\setup\claude_code.md" />
+    <None Include=".claude\skills\firebase-basics\references\setup\cursor.md" />
+    <None Include=".claude\skills\firebase-basics\references\setup\gemini_cli.md" />
+    <None Include=".claude\skills\firebase-basics\references\setup\github_copilot.md" />
+    <None Include=".claude\skills\firebase-basics\references\setup\other_agents.md" />
+    <None Include=".claude\skills\firebase-basics\references\web_setup.md" />
+    <None Include=".claude\skills\firebase-basics\SKILL.md" />
+    <None Include=".claude\skills\firebase-crashlytics\references\android_setup.md" />
+    <None Include=".claude\skills\firebase-crashlytics\references\ios_setup.md" />
+    <None Include=".claude\skills\firebase-crashlytics\SKILL.md" />
+    <None Include=".claude\skills\firebase-data-connect\examples.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\cloud_functions.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\config.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\data_seeding.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\native_sql.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\operations.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\realtime.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\schema.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\sdk_admin_node.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\sdk_android.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\sdk_flutter.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\sdk_ios.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\sdk_web.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\search.md" />
+    <None Include=".claude\skills\firebase-data-connect\reference\security.md" />
+    <None Include=".claude\skills\firebase-data-connect\SKILL.md" />
+    <None Include=".claude\skills\firebase-data-connect\templates.md" />
+    <None Include=".claude\skills\firebase-firestore\references\enterprise\android_sdk_usage.md" />
+    <None Include=".claude\skills\firebase-firestore\references\enterprise\data_model.md" />
+    <None Include=".claude\skills\firebase-firestore\references\enterprise\flutter_setup.md" />
+    <None Include=".claude\skills\firebase-firestore\references\enterprise\indexes.md" />
+    <None Include=".claude\skills\firebase-firestore\references\enterprise\ios_setup.md" />
+    <None Include=".claude\skills\firebase-firestore\references\enterprise\provisioning.md" />
+    <None Include=".claude\skills\firebase-firestore\references\enterprise\python_sdk_usage.md" />
+    <None Include=".claude\skills\firebase-firestore\references\enterprise\security_rules.md" />
+    <None Include=".claude\skills\firebase-firestore\references\enterprise\web_sdk_usage.md" />
+    <None Include=".claude\skills\firebase-firestore\references\standard\android_sdk_usage.md" />
+    <None Include=".claude\skills\firebase-firestore\references\standard\flutter_setup.md" />
+    <None Include=".claude\skills\firebase-firestore\references\standard\indexes.md" />
+    <None Include=".claude\skills\firebase-firestore\references\standard\ios_setup.md" />
+    <None Include=".claude\skills\firebase-firestore\references\standard\provisioning.md" />
+    <None Include=".claude\skills\firebase-firestore\references\standard\security_rules.md" />
+    <None Include=".claude\skills\firebase-firestore\references\standard\web_sdk_usage.md" />
+    <None Include=".claude\skills\firebase-firestore\SKILL.md" />
+    <None Include=".claude\skills\firebase-hosting-basics\references\configuration.md" />
+    <None Include=".claude\skills\firebase-hosting-basics\references\deploying.md" />
+    <None Include=".claude\skills\firebase-hosting-basics\SKILL.md" />
+    <None Include=".claude\skills\firebase-remote-config-basics\references\android_setup.md" />
+    <None Include=".claude\skills\firebase-remote-config-basics\references\ios_setup.md" />
+    <None Include=".claude\skills\firebase-remote-config-basics\SKILL.md" />
+    <None Include=".claude\skills\firebase-security-rules-auditor\SKILL.md" />
+    <None Include=".claude\skills\xcode-project-setup\scripts\xcode_spm_setup\Package.resolved" />
+    <None Include=".claude\skills\xcode-project-setup\scripts\xcode_spm_setup\Package.swift" />
+    <None Include=".claude\skills\xcode-project-setup\scripts\xcode_spm_setup\Sources\main.swift" />
+    <None Include=".claude\skills\xcode-project-setup\SKILL.md" />
+    <None Include=".firebaserc" />
+    <None Include=".firebase\hosting.cHVibGlj.cache" />
+    <None Include=".git\COMMIT_EDITMSG" />
+    <None Include=".git\config" />
+    <None Include=".git\description" />
+    <None Include=".git\FETCH_HEAD" />
+    <None Include=".git\HEAD" />
+    <None Include=".git\hooks\applypatch-msg.sample" />
+    <None Include=".git\hooks\commit-msg.sample" />
+    <None Include=".git\hooks\fsmonitor-watchman.sample" />
+    <None Include=".git\hooks\post-update.sample" />
+    <None Include=".git\hooks\pre-applypatch.sample" />
+    <None Include=".git\hooks\pre-commit.sample" />
+    <None Include=".git\hooks\pre-merge-commit.sample" />
+    <None Include=".git\hooks\pre-push.sample" />
+    <None Include=".git\hooks\pre-rebase.sample" />
+    <None Include=".git\hooks\pre-receive.sample" />
+    <None Include=".git\hooks\prepare-commit-msg.sample" />
+    <None Include=".git\hooks\push-to-checkout.sample" />
+    <None Include=".git\hooks\sendemail-validate.sample" />
+    <None Include=".git\hooks\update.sample" />
+    <None Include=".git\index" />
+    <None Include=".git\info\exclude" />
+    <None Include=".git\logs\HEAD" />
+    <None Include=".git\logs\refs\heads\main" />
+    <None Include=".git\logs\refs\remotes\origin\HEAD" />
+    <None Include=".git\logs\refs\remotes\origin\main" />
+    <None Include=".git\objects\00\b3c7913ef5a78715be66f1aa6131ff49364683" />
+    <None Include=".git\objects\02\671bf3b9269a50e4abffe17609934695040423" />
+    <None Include=".git\objects\04\a18756559d4a44e68d97c2936485e1e95c7ef1" />
+    <None Include=".git\objects\09\01b2faa4f09548bc0ccb7ec34dbf6c3a8ad986" />
+    <None Include=".git\objects\0a\c8f79dbd532590975d7206e17e6dc48053c2e6" />
+    <None Include=".git\objects\0b\50c3344dbe294f26d9fee89f1ac2892c148e6c" />
+    <None Include=".git\objects\0b\7989eb109bd0d4aca3290116779b4342254f91" />
+    <None Include=".git\objects\0d\17968bcff1cb7d8a8eaa4e2165007829e5b2dd" />
+    <None Include=".git\objects\0d\a6760522446dae83aa2148e472eedf06105f4d" />
+    <None Include=".git\objects\11\45ad6c5d542e3261e147c89f742861233281e8" />
+    <None Include=".git\objects\11\b0c95614d241950cda143aa7f39e6942cff83f" />
+    <None Include=".git\objects\11\d5cfb10162fc56b6e494c0c767f198490f1230" />
+    <None Include=".git\objects\14\526b3f294ac1929286af81f6f158333bfc87e0" />
+    <None Include=".git\objects\15\2a96c058d631d6f9a901abef91f811806e0dea" />
+    <None Include=".git\objects\15\365bb8f93223eb7613f820d8415f575dac3caa" />
+    <None Include=".git\objects\15\64eb9f69546a19512061fa556e4f749fa88e53" />
+    <None Include=".git\objects\16\53155b4e52c46f20f0b96e3577c583fcf29add" />
+    <None Include=".git\objects\16\c266d3bf0eaf3d93de7655e120e059a17389f3" />
+    <None Include=".git\objects\1b\a2d1a8979b63166b3ae4a2d317f423829fcf61" />
+    <None Include=".git\objects\1d\9102abb5c43b2a1e1b642c59e4701148554c08" />
+    <None Include=".git\objects\21\50e3960b2cc141666c6607f8ac1329f3c7bb29" />
+    <None Include=".git\objects\22\6b7ff5376a066f2a0cf3c4db91cf094b2e6aa6" />
+    <None Include=".git\objects\28\873aee2f881fc44fb617633beb9b4187d5a26b" />
+    <None Include=".git\objects\29\f49ab3541c1d023e4e3e056260e8873c701921" />
+    <None Include=".git\objects\2c\46b211b0f33a8b1020530a5f802e8b8536c92b" />
+    <None Include=".git\objects\2d\41600422abdc286e0e14251625f59c7e1c326c" />
+    <None Include=".git\objects\2d\9521a7d7c79f90b23880a25d8987bea3846381" />
+    <None Include=".git\objects\31\3eee7328745f8f9c7d4df4c50a5cee9da9f2b4" />
+    <None Include=".git\objects\31\8ab66c561dbc2475327a5f7c974a500e82b604" />
+    <None Include=".git\objects\32\579fc262fc07be131bb3d51620f6e5304d37cb" />
+    <None Include=".git\objects\32\ad6f15486ba89e0ba1593a758908538dd324dc" />
+    <None Include=".git\objects\34\233281352f2baffd0ba788ed18c853c894453c" />
+    <None Include=".git\objects\34\37a20e08c2f1485fe18a9d3612fe0e412f757e" />
+    <None Include=".git\objects\36\4d3c9569a4eb411cbd159448ffb917c12a8904" />
+    <None Include=".git\objects\36\975a5dc2f07a987c5bee22c02e96aa3e0450fc" />
+    <None Include=".git\objects\36\d33aca559c5dc11ffd1505f70c1d194a802686" />
+    <None Include=".git\objects\3a\705ef89840aa3452238ab0730444215d16e53a" />
+    <None Include=".git\objects\3d\0e1d349006a44219a7bd38fb81ff07c83f0eab" />
+    <None Include=".git\objects\40\4ff5ec08abff186a1fe1678b34309d9233e2e9" />
+    <None Include=".git\objects\40\a4db53f200816b0af1d2de1ad6a3486f065856" />
+    <None Include=".git\objects\46\97f5b7ff55329b485545c0d3e51fd592a85104" />
+    <None Include=".git\objects\47\0b6da4b3179a9907d7f169196f83aaa03ab8b8" />
+    <None Include=".git\objects\48\fd8209c05f44cb4c950f4cc0028608080b01e5" />
+    <None Include=".git\objects\4b\ca44f6d0ea4d68437a75673d7871978267d112" />
+    <None Include=".git\objects\4f\6a345bc1f0358dfc7c1e5a88947ace4a8165fb" />
+    <None Include=".git\objects\52\bfd8303bd5b2bfd967be2b6be1b4dcf4e127c8" />
+    <None Include=".git\objects\54\4f4a231cdb21c701eac818854e3189cc638d15" />
+    <None Include=".git\objects\54\d4c2f72668d1fb5a454fae8dd515afb414e8cd" />
+    <None Include=".git\objects\56\72d36312af14a4a39b3dca7c52f4cf12c23249" />
+    <None Include=".git\objects\58\061186d96ad885089f190f24dace5c9d8e4b65" />
+    <None Include=".git\objects\58\2d895f3a9393bfb9c14e9b75bd406b44cecae6" />
+    <None Include=".git\objects\59\45963c9832de177ba58aef99f63c18501d287e" />
+    <None Include=".git\objects\59\675140ea342a996df4184bdb40624955d308c1" />
+    <None Include=".git\objects\5a\0d26713b88a66125dfb4542ba8ecfd0603e0d3" />
+    <None Include=".git\objects\5a\788601e5faaedc81889782f488faa12c05d763" />
+    <None Include=".git\objects\5b\2e5741ce884dd930b1433e339e1873032b59f8" />
+    <None Include=".git\objects\5d\5d60fe821356b7936bc9c01e654e1d0ad91c62" />
+    <None Include=".git\objects\5d\9b861e9b6001d0d70ff00bd79478b4b674f132" />
+    <None Include=".git\objects\5f\3eca96bac6f59b030da9231c77447ffef31006" />
+    <None Include=".git\objects\5f\82bb5b8b769a47e66692e6b352fb0fc1d32b60" />
+    <None Include=".git\objects\61\2e93bc32d8e9ce8a31d5db9cef3205d3799ecc" />
+    <None Include=".git\objects\63\a48532e85329ae4c23d97277378b77c4f72f5c" />
+    <None Include=".git\objects\65\7a51e4fe0d52a31a2a9cacc5dadf59050f0f47" />
+    <None Include=".git\objects\67\6aab536965a3f1dbfa2114ca755b6534353346" />
+    <None Include=".git\objects\67\70dcb83cec217212ae2042f026aa59ba8349a2" />
+    <None Include=".git\objects\6a\1093cb051d47b145e8898f2059b3da901c2879" />
+    <None Include=".git\objects\6b\aab4b593d2fb78e07187b97dfe3f3ff9f91f3a" />
+    <None Include=".git\objects\6c\232e90842a4415fa6b493fe757098a5f342479" />
+    <None Include=".git\objects\6c\7b57bed2c6109fc5f1b21524b7a482dd9953e7" />
+    <None Include=".git\objects\6e\d9509fcc2cecc8d312b9b6ab09d4813e2d716c" />
+    <None Include=".git\objects\6f\814e526dcd5daefb99efd2e8f15be0b9612507" />
+    <None Include=".git\objects\6f\9815c2a3bd5004f54a8cc91be6e920109b0b32" />
+    <None Include=".git\objects\71\8eb834c2bdec15eb07afc3070d92f5598ef5c7" />
+    <None Include=".git\objects\73\f61bc6b800fe1bd1bff85b1427f0a6b6448c99" />
+    <None Include=".git\objects\75\b19c0021ab836fde6e42e9b3bcb344e85a41f9" />
+    <None Include=".git\objects\76\89cfdd0e358cb8d48aeb4de5b916b5d7dff27d" />
+    <None Include=".git\objects\79\d8db33030a0fadbfd4ae20eff2617e752185b5" />
+    <None Include=".git\objects\7a\081112de39931cec0cdaf31a40b1562f224937" />
+    <None Include=".git\objects\7b\9007daa104d671e999d645422f06bc3acf82d8" />
+    <None Include=".git\objects\7c\2589555b77e0851b98cb2f346a01b21869f941" />
+    <None Include=".git\objects\7f\46019e798257ad1ab8716eda76ace297ee3844" />
+    <None Include=".git\objects\80\2d45bc6e529be8ede3da091610ab118c455464" />
+    <None Include=".git\objects\83\4a4c851830d34f07555fe6eeae1d80e8770573" />
+    <None Include=".git\objects\83\540111c94d80e7b3abbac774bba332e4c86ea6" />
+    <None Include=".git\objects\84\8a5ad3d2792b6354d9f896bedaa0d2d0e62954" />
+    <None Include=".git\objects\85\c761da4a229f80d3beb0be09765608fafa6b09" />
+    <None Include=".git\objects\86\a9af50b65a7051f19207d29b500109c8c27386" />
+    <None Include=".git\objects\87\6a1499c09dc083612f43c53c0ae71b9c30c5b1" />
+    <None Include=".git\objects\89\7cef1b3a87ba214563f8e44e03cd88bc26a125" />
+    <None Include=".git\objects\8a\58456f5d4f2300e00b4d85f69a51d2cb58ffde" />
+    <None Include=".git\objects\8c\17f98dc2b129e41ac0d27020a2390cf6a419c6" />
+    <None Include=".git\objects\8d\d4cac0f2e4653194b89fc7fa1dfb6ee6b4991f" />
+    <None Include=".git\objects\8d\e81fac6d260debdb3ed7bac252eba618c72ba4" />
+    <None Include=".git\objects\8e\0b1502fa9140d907cad90cfbff0774dbb31b3a" />
+    <None Include=".git\objects\90\cbaef6c5ea8e79a6278fcbe0aeabb644c661f9" />
+    <None Include=".git\objects\91\a6d276cd139dfcccfec8813927d3d7d9ab9ca7" />
+    <None Include=".git\objects\93\fb369aff39f707e15c09542de480df00be53ee" />
+    <None Include=".git\objects\9a\4912dc09d8b16c7d44c4fc67b426087acd7487" />
+    <None Include=".git\objects\9d\7717e08ac9fa5ac3c0eabf056116f5cb5ba4c8" />
+    <None Include=".git\objects\9e\4a8a43eaf4e6a49a650a997354f3140f395ebc" />
+    <None Include=".git\objects\9f\7e0269cd5e46ee00c70ed959683024fefbf402" />
+    <None Include=".git\objects\9f\ba3d9da7d8c9d6631324e18a670ad364fad21c" />
+    <None Include=".git\objects\a0\ec02e5a3e75db84c58f64411a72db30d427d1f" />
+    <None Include=".git\objects\a2\052e24b04e5df619465d48a02cf2a8e601aabb" />
+    <None Include=".git\objects\a5\8f7eac2de4c3acb5b91862febbd6e8b38792eb" />
+    <None Include=".git\objects\a8\9e45201ba3ce26bc289cd2e1e6c2fb2a66ccea" />
+    <None Include=".git\objects\ad\1a1fd5c71ff861d72fdfb48421d507b98ee486" />
+    <None Include=".git\objects\ad\1e59e0aa54dcfe694e83ed1f1f14d673542d36" />
+    <None Include=".git\objects\b0\521e231836efbc41b1c24c893d81c347c2ae3d" />
+    <None Include=".git\objects\b0\f7e7fd317ee3c3fdff1234a60b2347705fbc34" />
+    <None Include=".git\objects\b1\7f6310755422d220e2c975ca4387ab465c95a0" />
+    <None Include=".git\objects\b4\3c334c144851b35f529c8a53899afcbbd7a432" />
+    <None Include=".git\objects\b4\5f985c200b08f771cf7434084cdf43d31e925b" />
+    <None Include=".git\objects\b9\7a33371d80cdc728279b22dcb9dc548507a1e9" />
+    <None Include=".git\objects\bb\4a810b66f428096070b8cb45be47b836746da5" />
+    <None Include=".git\objects\be\3e5fcdedd5eb00cdb8f6b53bc81a218959eb47" />
+    <None Include=".git\objects\c1\9d4d54cd51be6030932f9472ea95e2fe1a32b7" />
+    <None Include=".git\objects\c3\9d313d86549c41411b753e19b5774b202254dd" />
+    <None Include=".git\objects\c4\621dadd2207bd488fc977a530863a5e70a5a5b" />
+    <None Include=".git\objects\c7\0018d701f17088521ec3dd1e329dbccd0f248a" />
+    <None Include=".git\objects\c9\853a8be028b3ccc0a114043e23d32940dd95fa" />
+    <None Include=".git\objects\c9\b39c800143e29968c3d0b2f5ea2273a0a0edd0" />
+    <None Include=".git\objects\ca\02ae0d62ae14aebf7b793a9dd259d9fb19941b" />
+    <None Include=".git\objects\ca\0691ae2b2e74ca353d2d6e9cd82403573f2fa1" />
+    <None Include=".git\objects\cc\6f00faeca055fd5ec0c81cae79ad5757589190" />
+    <None Include=".git\objects\cd\a9d70bedb916c5a8b7de6baf3e695e60f17f52" />
+    <None Include=".git\objects\ce\87f61a7f6a34b03cf3ba33b6db09e718237ca7" />
+    <None Include=".git\objects\d2\5b916e979f6d179e0888e5c3bcfbe35f030321" />
+    <None Include=".git\objects\d4\b4408af87b98284d914314a6d5aa2b4cae2885" />
+    <None Include=".git\objects\d4\ca68c465ff15f579040e5e1493e33092741b06" />
+    <None Include=".git\objects\d7\40094bc4ddbe491d33d6b93824a934a7bfa9da" />
+    <None Include=".git\objects\d7\cd80d8c408ea009e94156adcce5421eef1f9b4" />
+    <None Include=".git\objects\d8\7481a06b39607329a07c493ca45fa1a72c4db3" />
+    <None Include=".git\objects\da\3c29e5429e846d9b13154df5fc506421f7c020" />
+    <None Include=".git\objects\dc\5c635fe877d6648f53d027520cdd23aeb14a70" />
+    <None Include=".git\objects\dd\345e64a26b5d027fb5cfe916f5bd7141257f0d" />
+    <None Include=".git\objects\dd\eb50f64c2fd6b237d180ea1deb3e0fa4dc13b7" />
+    <None Include=".git\objects\e8\2bbf42cefa8cc0a558030588b0f83abceb0778" />
+    <None Include=".git\objects\eb\e42eb8d395c7513400854257ea49447dea892c" />
+    <None Include=".git\objects\f2\0e55d9a5dc9e518025b8e71ebcfd5b55861f78" />
+    <None Include=".git\objects\f5\025c35ab7f58ee3f43286a00f7e400636e22ac" />
+    <None Include=".git\objects\f8\8ada2600ca6b5190b5817d39925c579c8b9679" />
+    <None Include=".git\objects\f9\5dfcb5ac79a879a3e5b3bc0214009c6f2c666a" />
+    <None Include=".git\objects\ff\4cfd5e8fdc49176c2d1d409afa897f40be01f4" />
+    <None Include=".git\objects\ff\6c4b90a6691d0fa591f9bee9d9b226e6ca1da6" />
+    <None Include=".git\refs\heads\main" />
+    <None Include=".git\refs\remotes\origin\HEAD" />
+    <None Include=".git\refs\remotes\origin\main" />
+    <None Include=".vs\Kindle-EPUB-Fixer.slnx\FileContentIndex\ebec6cd8-2ac1-4fbe-921d-2821b62c2ea8.vsidx" />
+    <None Include=".vs\Kindle-EPUB-Fixer.slnx\v18\.wsuo" />
+    <None Include=".vs\Kindle-EPUB-Fixer.slnx\v18\DocumentLayout.json" />
+    <None Include=".vs\ProjectSettings.json" />
+    <None Include=".vs\slnx.sqlite" />
+    <None Include=".vs\VSWorkspaceState.json" />
+    <None Include="Bom dia inverno %28Tamara Klink%29 RUIM.epub" />
+    <None Include="Bom-dia-inverno-Tamara-Klink-kindle-EPUB-FIXED RUIM.epub" />
+    <None Include="Bom_dia_inverno_Kindle_corrigido_pelo_GPT_WORKING.epub" />
+    <None Include="deploy.cmd" />
+    <None Include="firebase.json" />
+    <None Include="README.md" />
+    <None Include="skills-lock.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include=".agents\skills\xcode-project-setup\scripts\xcode_spm_setup\.gitignore" />
+    <Content Include=".claude\skills\xcode-project-setup\scripts\xcode_spm_setup\.gitignore" />
+    <Content Include=".gitignore" />
+    <Content Include="app.js" />
+    <Content Include="google9701d75c43e1e331.html" />
+    <Content Include="i18n.js" />
+    <Content Include="index.html" />
+    <Content Include="LICENSE.txt" />
+    <Content Include="public\app.js" />
+    <Content Include="public\google9701d75c43e1e331.html" />
+    <Content Include="public\i18n.js" />
+    <Content Include="public\index.html" />
+    <Content Include="public\styles.css" />
+    <Content Include="public\vendor\jszip.min.js" />
+    <Content Include="styles.css" />
+    <Content Include="vendor\jszip.min.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include=".git\objects\info\" />
+    <Folder Include=".git\objects\pack\" />
+    <Folder Include=".git\refs\tags\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
+  <ProjectExtensions>
+    <VisualStudio AllowExistingFolder="true" />
+  </ProjectExtensions>
+</Project>

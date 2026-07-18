@@ -88,6 +88,7 @@
     progressDetail: document.getElementById("progressDetail"),
     repairButton: document.getElementById("repairButton"),
     downloadButton: document.getElementById("downloadButton"),
+    sendToKindleLink: document.getElementById("sendToKindleLink"),
     downloadReportButton: document.getElementById("downloadReportButton"),
     reportDetails: document.getElementById("reportDetails"),
     reportList: document.getElementById("reportList"),
@@ -207,6 +208,7 @@
     dom.selectedFile.classList.remove("hidden");
     dom.repairButton.disabled = false;
     dom.downloadButton.classList.add("hidden");
+    if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
     showIdleState();
   }
 
@@ -223,6 +225,7 @@
     dom.selectedFile.classList.add("hidden");
     dom.repairButton.disabled = true;
     dom.downloadButton.classList.add("hidden");
+    if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
     showIdleState();
   }
 
@@ -284,6 +287,7 @@
     dom.repairButton.disabled = true;
     if (dom.languageSelect) dom.languageSelect.disabled = true;
     dom.downloadButton.classList.add("hidden");
+    if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
     const options = readOptions();
 
     try {
@@ -1331,16 +1335,19 @@
       dom.resultTitle.textContent = t("result.successTitle");
       dom.resultText.textContent = t("result.successText");
       dom.downloadButton.classList.remove("hidden");
+      if (dom.sendToKindleLink) dom.sendToKindleLink.classList.remove("hidden");
     } else if (hasOutput) {
       dom.resultBanner.classList.add("warning");
       dom.resultTitle.textContent = t("result.warningTitle");
       dom.resultText.textContent = t("result.warningText");
       dom.downloadButton.classList.remove("hidden");
+      if (dom.sendToKindleLink) dom.sendToKindleLink.classList.remove("hidden");
     } else {
       dom.resultBanner.classList.add("error");
       dom.resultTitle.textContent = t("result.errorTitle");
       dom.resultText.textContent = t("result.errorText");
       dom.downloadButton.classList.add("hidden");
+      if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
     }
     if (dom.reportDetails) dom.reportDetails.open = !hasOutput || stats.errors > 0;
     renderReport();

@@ -78,3 +78,8 @@ node_modules/
 
 #epub books
 *.epub
+
+.vs
+obj/*
+*.user
+
