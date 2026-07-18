@@ -387,8 +387,6 @@
     <None Include=".vs\slnx.sqlite" />
     <None Include=".vs\VSWorkspaceState.json" />
     <None Include="Bom dia inverno %28Tamara Klink%29 RUIM.epub" />
-    <None Include="Bom-dia-inverno-Tamara-Klink-kindle-EPUB-FIXED RUIM.epub" />
-    <None Include="Bom_dia_inverno_Kindle_corrigido_pelo_GPT_WORKING.epub" />
     <None Include="deploy.cmd" />
     <None Include="firebase.json" />
     <None Include="README.md" />

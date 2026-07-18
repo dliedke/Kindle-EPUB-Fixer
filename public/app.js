@@ -123,6 +123,7 @@
   function initialize() {
     i18n?.initialize();
     if (dom.languageSelect) {
+      populateLanguageOptions();
       dom.languageSelect.value = i18n?.getLanguage() || "en";
       dom.languageSelect.addEventListener("change", () => {
         i18n?.setLanguage(dom.languageSelect.value);
@@ -172,6 +173,18 @@
     });
 
     bindExclusiveMarginOptions();
+  }
+
+  function populateLanguageOptions() {
+    const languages = i18n?.getLanguages?.();
+    if (!dom.languageSelect || !Array.isArray(languages) || !languages.length) return;
+    dom.languageSelect.replaceChildren();
+    for (const { code, native } of languages) {
+      const option = document.createElement("option");
+      option.value = code;
+      option.textContent = native;
+      dom.languageSelect.appendChild(option);
+    }
   }
 
   function bindExclusiveMarginOptions() {
@@ -840,7 +853,7 @@
     }
 
     const title = ensureMetadataElement(documentNode, metadata, "title", t("book.untitled"), "title", opfPath);
-    const language = ensureMetadataElement(documentNode, metadata, "language", i18n?.getLanguage() === "pt" ? "pt-BR" : "en", "language", opfPath);
+    const language = ensureMetadataElement(documentNode, metadata, "language", i18n?.getOpfLanguage?.() || "en", "language", opfPath);
     const identifierResult = ensureIdentifier(documentNode, packageElement, metadata, opfPath, preserveIdentifier);
     const bookIdentifier = identifierResult.value;
 
@@ -1248,16 +1261,10 @@
   }
 
   function bookText(language, key, variables = {}) {
-    const usePortuguese = /^pt(?:-|$)/i.test(language || "") ||
-      ((!language || language === "und") && i18n?.getLanguage() === "pt");
-    const dictionaries = {
-      pt: { generic: "Livro", toc: "Sumário", content: "Conteúdo", section: "Seção {{number}}" },
-      en: { generic: "Book", toc: "Table of Contents", content: "Content", section: "Section {{number}}" }
-    };
-    const template = dictionaries[usePortuguese ? "pt" : "en"][key] || key;
-    return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, name) => {
-      return Object.prototype.hasOwnProperty.call(variables, name) ? String(variables[name]) : match;
-    });
+    // Usa o idioma declarado no próprio EPUB quando conhecido; senão cai no idioma da interface.
+    const tag = language && language !== "und" ? language : null;
+    if (i18n?.translateFor) return i18n.translateFor(tag, `book.${key}`, variables);
+    return t(`book.${key}`, variables);
   }
 
   function generateNavXhtml(navPath, title, language, spineRecords, contentMap) {
@@ -1981,7 +1988,7 @@
     const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
     const value = bytes / (1024 ** index);
     const maximumFractionDigits = index === 0 || value >= 10 ? 0 : 1;
-    const locale = i18n?.getLanguage() === "pt" ? "pt-BR" : "en-US";
+    const locale = i18n?.getLocale?.() || "en-US";
     const formatted = new Intl.NumberFormat(locale, { maximumFractionDigits }).format(value);
     return `${formatted} ${units[index]}`;
   }
