@@ -6,6 +6,8 @@ copy /Y index.html public\ >nul
 copy /Y app.js public\ >nul
 copy /Y i18n.js public\ >nul
 copy /Y styles.css public\ >nul
+copy /Y sitemap.xml public\ >nul
+copy /Y robots.txt public\ >nul
 copy /Y google*.html public\ >nul 2>nul
 
 if not exist public\vendor mkdir public\vendor

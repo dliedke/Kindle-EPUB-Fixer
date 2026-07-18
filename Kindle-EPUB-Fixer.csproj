@@ -1,8 +1,10 @@
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <TargetFramework>net10.0</TargetFramework>
     <ProjectGuid>{6E81D95A-5E4B-FC66-FDB4-677B3A10CC80}</ProjectGuid>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="**\*.html;**\*.js;**\*.css" Exclude=".git\**;.vs\**;.firebase\**;.agents\**;.claude\**;bin\**;obj\**;node_modules\**" />
@@ -12,10 +14,11 @@
     <None Include=".firebaserc" />
     <None Include="firebase.json" />
     <None Include="deploy.cmd" />
+    <None Include="sitemap.xml" />
+    <None Include="robots.txt" />
     <None Include="README.md" />
     <None Include="LICENSE.txt" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
