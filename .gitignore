@@ -75,3 +75,6 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+#epub books
+*.epub

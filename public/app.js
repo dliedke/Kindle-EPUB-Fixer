@@ -432,10 +432,14 @@
 
       await updateProgress(t("progress.rebuild.label"), 86, t("progress.rebuild.detail"));
       const outputZip = new JSZip();
+      // JSZip grava o horário como UTC no formato DOS (que é local); compensa o
+      // fuso para não gerar timestamps no futuro dentro do ZIP.
+      const zipDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
       outputZip.file("mimetype", "application/epub+zip", {
         binary: false,
         compression: "STORE",
-        createFolders: false
+        createFolders: false,
+        date: zipDate
       });
 
       const sortedOutputPaths = [...contentMap.keys()]
@@ -449,7 +453,8 @@
           binary: !item.isText,
           compression: "DEFLATE",
           compressionOptions: { level: 9 },
-          createFolders: true
+          createFolders: false,
+          date: zipDate
         });
       }
 
@@ -825,6 +830,8 @@
     }
 
     packageElement.setAttribute("version", packageElement.getAttribute("version") || "3.0");
+    removeUnusedPackagePrefixes(documentNode, packageElement, opfPath);
+    updateModifiedTimestamp(documentNode, packageElement, metadata, opfPath);
     const serialized = serializeXmlDocument(documentNode);
     opfItem.data = serialized;
     addIssue("fixed", "Pacote OPF validado e normalizado.", opfPath, "OPF_NORMALIZED");
@@ -840,6 +847,51 @@
       navPath: navigationInfo.navPath,
       ncxPath: navigationInfo.ncxPath
     };
+  }
+
+  function removeUnusedPackagePrefixes(documentNode, packageElement, opfPath) {
+    const declaration = packageElement.getAttribute("prefix");
+    if (!declaration) return;
+
+    // Prefixos reservados do EPUB 3 dispensam declaração.
+    const reservedPrefixes = new Set(["a11y", "dcterms", "marc", "media", "onix", "rendition", "schema", "xsd"]);
+    const usedPrefixes = new Set();
+    const prefixedValueAttributes = ["property", "properties", "rel", "scheme", "epub:type"];
+    for (const element of documentNode.getElementsByTagName("*")) {
+      for (const attributeName of prefixedValueAttributes) {
+        const value = element.getAttribute(attributeName);
+        if (!value) continue;
+        for (const token of value.split(/\s+/)) {
+          const separator = token.indexOf(":");
+          if (separator > 0) usedPrefixes.add(token.slice(0, separator));
+        }
+      }
+    }
+
+    const declaredPairs = [...declaration.matchAll(/(\S+):\s+(\S+)/g)];
+    const keptPairs = declaredPairs.filter(([, name]) => usedPrefixes.has(name) && !reservedPrefixes.has(name));
+    if (keptPairs.length === declaredPairs.length) return;
+
+    if (keptPairs.length) {
+      packageElement.setAttribute("prefix", keptPairs.map(([pair]) => pair).join(" "));
+    } else {
+      packageElement.removeAttribute("prefix");
+    }
+    addIssue("fixed", "Declarações de prefixo não utilizadas removidas do OPF para compatibilidade com o conversor do Kindle.", opfPath, "OPF_PREFIX_CLEANED");
+  }
+
+  function updateModifiedTimestamp(documentNode, packageElement, metadata, opfPath) {
+    const isEpub3 = /^3/.test(packageElement.getAttribute("version") || "3.0");
+    let modifiedMeta = [...metadata.getElementsByTagNameNS("*", "meta")]
+      .find((element) => (element.getAttribute("property") || "").trim() === "dcterms:modified");
+    if (!modifiedMeta) {
+      if (!isEpub3) return;
+      modifiedMeta = documentNode.createElementNS(metadata.namespaceURI || XMLNS_OPF, "meta");
+      modifiedMeta.setAttribute("property", "dcterms:modified");
+      metadata.appendChild(modifiedMeta);
+    }
+    modifiedMeta.textContent = new Date().toISOString().replace(/\.\d+Z$/, "Z");
+    addIssue("fixed", "Data de modificação (dcterms:modified) atualizada para o Kindle tratar o arquivo como novo documento.", opfPath, "OPF_MODIFIED_UPDATED");
   }
 
   function inspectPackageDocument(contentMap, opfPath) {
@@ -1088,6 +1140,8 @@
           sourcePath: ncxRecord.target
         });
         addIssue("fixed", "Sumário NCX vazio ou inválido foi reconstruído.", ncxRecord.target, "NCX_REBUILT");
+      } else {
+        ensureNcxPlayOrder(contentMap, ncxRecord.target);
       }
     }
 
@@ -1097,6 +1151,20 @@
     }
 
     return { navPath: navRecord.target, ncxPath: ncxRecord.target };
+  }
+
+  function ensureNcxPlayOrder(contentMap, ncxPath) {
+    const ncxItem = contentMap.get(ncxPath);
+    if (!ncxItem?.isText) return;
+    const documentNode = parseXml(ncxItem.data);
+    if (!documentNode) return;
+    const navPoints = [...documentNode.getElementsByTagNameNS("*", "navPoint")];
+    if (!navPoints.length || navPoints.every((navPoint) => navPoint.getAttribute("playOrder"))) return;
+    navPoints.forEach((navPoint, index) => {
+      navPoint.setAttribute("playOrder", String(index + 1));
+    });
+    ncxItem.data = serializeXmlDocument(documentNode);
+    addIssue("fixed", "Atributo playOrder adicionado aos itens do sumário NCX para compatibilidade com o Kindle.", ncxPath, "NCX_PLAYORDER_ADDED");
   }
 
   function repairCoverMetadata(documentNode, metadata, manifest, manifestInfo, opfPath) {
