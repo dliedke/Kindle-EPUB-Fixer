@@ -88,6 +88,7 @@
     progressDetail: document.getElementById("progressDetail"),
     repairButton: document.getElementById("repairButton"),
     downloadButton: document.getElementById("downloadButton"),
+    shareButton: document.getElementById("shareButton"),
     downloadReportButton: document.getElementById("downloadReportButton"),
     reportList: document.getElementById("reportList"),
     errorCount: document.getElementById("errorCount"),
@@ -142,6 +143,7 @@
     dom.recommendedButton.addEventListener("click", useRecommendedOptions);
     dom.repairButton.addEventListener("click", repairSelectedFile);
     dom.downloadButton.addEventListener("click", downloadOutput);
+    dom.shareButton.addEventListener("click", shareOutput);
     dom.downloadReportButton.addEventListener("click", downloadReport);
 
     for (const eventName of ["dragenter", "dragover"]) {
@@ -206,6 +208,7 @@
     dom.selectedFile.classList.remove("hidden");
     dom.repairButton.disabled = false;
     dom.downloadButton.classList.add("hidden");
+    dom.shareButton.classList.add("hidden");
     showIdleState();
   }
 
@@ -222,6 +225,7 @@
     dom.selectedFile.classList.add("hidden");
     dom.repairButton.disabled = true;
     dom.downloadButton.classList.add("hidden");
+    dom.shareButton.classList.add("hidden");
     showIdleState();
   }
 
@@ -283,6 +287,7 @@
     dom.repairButton.disabled = true;
     if (dom.languageSelect) dom.languageSelect.disabled = true;
     dom.downloadButton.classList.add("hidden");
+    dom.shareButton.classList.add("hidden");
     const options = readOptions();
 
     try {
@@ -1262,16 +1267,19 @@
       dom.resultTitle.textContent = t("result.successTitle");
       dom.resultText.textContent = t("result.successText");
       dom.downloadButton.classList.remove("hidden");
+      dom.shareButton.classList.toggle("hidden", !canShareFiles());
     } else if (hasOutput) {
       dom.resultBanner.classList.add("warning");
       dom.resultTitle.textContent = t("result.warningTitle");
       dom.resultText.textContent = t("result.warningText");
       dom.downloadButton.classList.remove("hidden");
+      dom.shareButton.classList.toggle("hidden", !canShareFiles());
     } else {
       dom.resultBanner.classList.add("error");
       dom.resultTitle.textContent = t("result.errorTitle");
       dom.resultText.textContent = t("result.errorText");
       dom.downloadButton.classList.add("hidden");
+      dom.shareButton.classList.add("hidden");
     }
     renderReport();
   }
@@ -1387,6 +1395,33 @@
   function downloadOutput() {
     if (!state.outputBlob) return;
     triggerBlobDownload(state.outputBlob, state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`);
+  }
+
+  function canShareFiles() {
+    if (typeof navigator === "undefined" || !navigator.share || !navigator.canShare) return false;
+    try {
+      const probe = new File([""], "probe.epub", { type: "application/epub+zip" });
+      return navigator.canShare({ files: [probe] });
+    } catch {
+      return false;
+    }
+  }
+
+  async function shareOutput() {
+    if (!state.outputBlob) return;
+    if (!canShareFiles()) {
+      window.alert(t("share.unsupported"));
+      return;
+    }
+    const filename = state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`;
+    const file = new File([state.outputBlob], filename, { type: "application/epub+zip" });
+    try {
+      await navigator.share({ files: [file], title: filename });
+    } catch (error) {
+      if (error?.name !== "AbortError") {
+        window.alert(t("share.failed"));
+      }
+    }
   }
 
   function downloadReport() {
