@@ -744,7 +744,7 @@
     }
     dom.previewFrame.srcdoc = previewState.mode === "original"
       ? previewState.baseHtml
-      : applyReducedMargins(previewState.baseHtml, previewState.mode === "mini" ? "mini" : "reduced");
+      : applyReducedMargins(previewState.baseHtml, previewState.mode === "mini" ? "mini-preview" : "reduced");
   }
 
   function setPreviewMode(mode) {
@@ -2070,7 +2070,7 @@
   }
 
   function applyReducedMargins(text, level = "reduced") {
-    const padding = level === "mini" ? "0" : "0 2%";
+    const padding = level === "mini" ? "0" : level === "mini-preview" ? "0 1%" : "0 2%";
     const marginStyle = `<style type="text/css">html,body{margin:0 !important;padding:${padding} !important;}</style>`;
     if (/<\/head>/i.test(text)) {
       return text.replace(/<\/head>/i, `${marginStyle}</head>`);
