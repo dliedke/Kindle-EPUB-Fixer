@@ -114,21 +114,19 @@
 
     <section class="panel upload-panel" aria-labelledby="upload-title">
       <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-describedby="drop-help">
-        <input id="fileInput" type="file" accept=".epub,application/epub+zip" hidden>
+        <input id="fileInput" type="file" accept=".epub,application/epub+zip" multiple hidden>
         <div class="drop-icon" aria-hidden="true">↥</div>
         <h2 id="upload-title" data-i18n="upload.title">Solte o EPUB aqui</h2>
-        <p id="drop-help" data-i18n="upload.help">ou clique para escolher um arquivo</p>
-        <span class="file-limit" data-i18n="upload.limit">Recomendado: até 500 MB</span>
+        <p id="drop-help" data-i18n="upload.help">ou clique para escolher um ou mais arquivos</p>
+        <span class="file-limit" data-i18n="upload.limit">Recomendado: até 500 MB por arquivo</span>
       </div>
 
-      <div id="selectedFile" class="selected-file hidden" aria-live="polite">
-        <div class="file-symbol" aria-hidden="true">EPUB</div>
-        <div class="file-details">
-          <strong id="fileName"></strong>
-          <span id="fileSize"></span>
-        </div>
-        <button id="removeFileButton" class="icon-button" type="button" data-i18n-aria-label="upload.remove" aria-label="Remover arquivo">×</button>
+      <div id="batchSummary" class="batch-summary hidden" aria-live="polite">
+        <span id="batchSummaryText"></span>
+        <button id="downloadAllButton" class="text-button hidden" type="button" data-i18n="button.downloadAll">Baixar todos (.zip)</button>
       </div>
+
+      <div id="fileList" class="file-list hidden" aria-live="polite"></div>
     </section>
 
     <section class="panel action-panel">
