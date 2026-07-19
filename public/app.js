@@ -117,7 +117,7 @@
   };
 
   const optionIds = [
-    "reduceMargins", "miniMargins", "normalizePaths", "removeJunk", "repairPackage", "repairNavigation", "repairText",
+    "reduceMargins", "miniMargins", "normalizePaths", "removeJunk", "repairPackage", "repairNavigation", "rebuildChapters", "repairText",
     "repairCover", "addUnlisted", "removeMissing", "stripScripts"
   ];
 
@@ -512,6 +512,7 @@
       removeJunk: true,
       repairPackage: true,
       repairNavigation: true,
+      rebuildChapters: false,
       repairText: true,
       repairCover: true,
       addUnlisted: true,
@@ -1398,7 +1399,8 @@
         title,
         language,
         bookIdentifier,
-        opfNamespace
+        opfNamespace,
+        options
       });
     }
 
@@ -1727,7 +1729,76 @@
       addIssue("fixed", "Spine vinculado ao sumário NCX.", opfPath, "SPINE_TOC_FIXED");
     }
 
+    if (context.options?.rebuildChapters) {
+      expandNavigationFromChapters(context, navRecord, ncxRecord, spineRecords);
+    }
+
     return { navPath: navRecord.target, ncxPath: ncxRecord.target };
+  }
+
+  // Detecta capítulos que existem como documentos no spine mas não aparecem no
+  // sumário (NAV/NCX) e reconstrói ambos listando cada capítulo, na ordem de leitura.
+  // Resolve o caso em que o livro tem 1 entrada por "parte" e o Kindle trata a parte
+  // inteira como um único capítulo.
+  function expandNavigationFromChapters(context, navRecord, ncxRecord, spineRecords) {
+    const { contentMap, title, language, bookIdentifier } = context;
+
+    const chapterRecords = spineRecords.filter((record) =>
+      record.target !== navRecord.target &&
+      record.target !== ncxRecord.target &&
+      isChapterLikeDocument(contentMap.get(record.target)?.data));
+    if (chapterRecords.length === 0) return;
+
+    const referenced = collectNavReferencedTargets(contentMap.get(navRecord.target)?.data, navRecord.target);
+    const missing = chapterRecords.filter((record) => !referenced.has(record.target.toLowerCase()));
+    if (missing.length === 0) return;
+
+    // Rótulos numéricos simples (1, 2, 3…) em vez da primeira frase de cada capítulo,
+    // que deixa o sumário poluído.
+    const numericLabel = (record, index) => String(index + 1);
+    contentMap.set(navRecord.target, {
+      data: generateNavXhtml(navRecord.target, title, language, chapterRecords, contentMap, numericLabel),
+      isText: true,
+      sourcePath: navRecord.target
+    });
+    contentMap.set(ncxRecord.target, {
+      data: generateNcx(ncxRecord.target, title, bookIdentifier, chapterRecords, contentMap, numericLabel),
+      isText: true,
+      sourcePath: ncxRecord.target
+    });
+    addIssue(
+      "fixed",
+      `Sumário reconstruído com ${chapterRecords.length} capítulos detectados no livro (${missing.length} estavam ausentes). Assim o Kindle passa a reconhecer cada capítulo.`,
+      navRecord.target,
+      "CHAPTERS_REBUILT"
+    );
+  }
+
+  // Conjunto de caminhos de conteúdo (em minúsculas) já referenciados pelos links do NAV.
+  function collectNavReferencedTargets(navText, navPath) {
+    const result = new Set();
+    if (typeof navText !== "string" || !navText) return result;
+    const documentNode = parseXml(navText);
+    if (!documentNode) return result;
+    for (const anchor of documentNode.getElementsByTagNameNS("*", "a")) {
+      const href = anchor.getAttribute("href");
+      if (!href || isExternalReference(href)) continue;
+      const { pathPart } = splitReference(decodeXmlAttribute(href));
+      if (!pathPart) continue;
+      result.add(normalizePackagePath(joinPath(dirname(navPath), pathPart)).toLowerCase());
+    }
+    return result;
+  }
+
+  // Heurística conservadora: um documento é "capítulo" se estiver marcado como tal
+  // (epub:type/role) ou se tiver um título/abertura de capítulo (heading ou p.inicio).
+  function isChapterLikeDocument(text) {
+    if (typeof text !== "string" || !text) return false;
+    if (/epub:type\s*=\s*["'][^"']*\bchapter\b/i.test(text)) return true;
+    if (/\brole\s*=\s*["'][^"']*\bdoc-chapter\b/i.test(text)) return true;
+    if (/<h[1-3][\s>]/i.test(text)) return true;
+    if (/class\s*=\s*["'][^"']*\binicio\b/i.test(text)) return true;
+    return false;
   }
 
   function ensureNcxPlayOrder(contentMap, ncxPath) {
@@ -1791,9 +1862,11 @@
     return t(`book.${key}`, variables);
   }
 
-  function generateNavXhtml(navPath, title, language, spineRecords, contentMap) {
+  function generateNavXhtml(navPath, title, language, spineRecords, contentMap, labelForRecord) {
     const links = spineRecords.map((record, index) => {
-      const label = extractDocumentTitle(contentMap.get(record.target)?.data, record.target, index + 1);
+      const label = labelForRecord
+        ? labelForRecord(record, index)
+        : extractDocumentTitle(contentMap.get(record.target)?.data, record.target, index + 1);
       const href = relativePath(dirname(navPath), record.target);
       return `      <li><a href="${escapeXml(href)}">${escapeXml(label)}</a></li>`;
     }).join("\n");
@@ -1804,9 +1877,11 @@
     return `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html>\n<html xmlns="${XMLNS_XHTML}" xmlns:epub="http://www.idpf.org/2007/ops" lang="${escapeXml(language || "und")}" xml:lang="${escapeXml(language || "und")}">\n<head>\n  <meta charset="UTF-8"/>\n  <title>${escapeXml(tocLabel)} — ${escapeXml(title || genericBook)}</title>\n</head>\n<body>\n  <nav epub:type="toc" id="toc">\n    <h1>${escapeXml(tocLabel)}</h1>\n    <ol>\n${links || `      <li>${escapeXml(contentLabel)}</li>`}\n    </ol>\n  </nav>\n</body>\n</html>\n`;
   }
 
-  function generateNcx(ncxPath, title, identifier, spineRecords, contentMap) {
+  function generateNcx(ncxPath, title, identifier, spineRecords, contentMap, labelForRecord) {
     const navPoints = spineRecords.map((record, index) => {
-      const label = extractDocumentTitle(contentMap.get(record.target)?.data, record.target, index + 1);
+      const label = labelForRecord
+        ? labelForRecord(record, index)
+        : extractDocumentTitle(contentMap.get(record.target)?.data, record.target, index + 1);
       const src = relativePath(dirname(ncxPath), record.target);
       return `    <navPoint id="navPoint-${index + 1}" playOrder="${index + 1}">\n      <navLabel><text>${escapeXml(label)}</text></navLabel>\n      <content src="${escapeXml(src)}"/>\n    </navPoint>`;
     }).join("\n");
