@@ -1930,6 +1930,9 @@
       if (dom.supportLink) dom.supportLink.classList.add("hidden");
       if (dom.filenameField) dom.filenameField.classList.add("hidden");
     }
+    if (jobs.length > 1) {
+      dom.downloadButton.classList.add("hidden");
+    }
     if (dom.reportDetails) dom.reportDetails.open = !hasOutput || stats.errors > 0;
     renderReport();
   }
