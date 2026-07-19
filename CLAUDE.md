@@ -124,7 +124,7 @@ Use o `hreflang` de `LANGUAGE_META.htmlLang` (ex.: `zh` → `zh-CN`, `pt` → `p
 - Mensagens de commit em inglês, no imperativo, seguindo o histórico (`Add ...`, `Fix ...`).
 - Sem dependências novas. O projeto roda de `file://` — nada de `import`/`export`, módulos ES, `fetch` de recursos externos ou CDNs. Se precisar de uma lib, ela entra minificada em `vendor/` e é carregada por `<script>` no `index.html`.
 - Acesso a `localStorage` sempre pelos wrappers `safeStorageGet`/`safeStorageSet`, que engolem exceções — em `file://` e modo anônimo o acesso direto lança.
-- `PLAN.md` guarda planos de implementação de features em andamento; consulte antes de iniciar trabalho novo.
+- Planos de implementação de features maiores ficam num `PLAN.md` temporário na raiz, removido quando a feature entra. Se ele existir, consulte antes de começar trabalho novo.
 
 ## Fragilidades conhecidas
 
