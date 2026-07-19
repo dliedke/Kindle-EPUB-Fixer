@@ -187,6 +187,49 @@ h1 {
 }
 .icon-button:hover { background: rgba(251, 113, 133, 0.1); color: var(--danger); }
 
+.file-list { display: grid; gap: 10px; margin-top: 16px; }
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 84px;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--panel-soft);
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+.file-row:hover { border-color: var(--accent-light); }
+.file-row.active { border-color: var(--accent-light); background: rgba(124, 58, 237, 0.1); }
+.file-status {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--muted);
+}
+.file-row.status-processing .file-status { background: rgba(96, 165, 250, 0.16); color: #93c5fd; }
+.file-row.status-success .file-status { background: rgba(16, 185, 129, 0.16); color: var(--success); }
+.file-row.status-warning .file-status { background: rgba(245, 158, 11, 0.16); color: #fbbf24; }
+.file-row.status-error .file-status { background: rgba(244, 63, 94, 0.16); color: var(--danger); }
+
+.batch-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 10px 4px 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
 .action-panel { padding: 25px; margin-bottom: 22px; }
 .text-button {
   border: 0;

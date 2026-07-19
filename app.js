@@ -76,10 +76,10 @@
     languageSelect: document.getElementById("languageSelect"),
     dropZone: document.getElementById("dropZone"),
     fileInput: document.getElementById("fileInput"),
-    selectedFile: document.getElementById("selectedFile"),
-    fileName: document.getElementById("fileName"),
-    fileSize: document.getElementById("fileSize"),
-    removeFileButton: document.getElementById("removeFileButton"),
+    fileList: document.getElementById("fileList"),
+    batchSummary: document.getElementById("batchSummary"),
+    batchSummaryText: document.getElementById("batchSummaryText"),
+    downloadAllButton: document.getElementById("downloadAllButton"),
     recommendedButton: document.getElementById("recommendedButton"),
     idleState: document.getElementById("idleState"),
     progressState: document.getElementById("progressState"),
@@ -121,16 +121,33 @@
     "repairCover", "addUnlisted", "removeMissing", "stripScripts"
   ];
 
-  const state = {
-    inputFile: null,
-    outputBlob: null,
-    outputName: "",
-    report: [],
-    reportFilter: "all",
-    reportDocument: null,
-    processing: false,
-    lastResult: null
-  };
+  let jobIdCounter = 0;
+  function createJob(file) {
+    jobIdCounter += 1;
+    return {
+      id: jobIdCounter,
+      inputFile: file,
+      outputBlob: null,
+      outputName: "",
+      report: [],
+      reportFilter: "all",
+      reportDocument: null,
+      lastResult: null,
+      status: "pending"
+    };
+  }
+
+  let jobs = [];
+  let state = null;
+  let batchProcessing = false;
+
+  function setActiveJob(job) {
+    state = job;
+  }
+
+  function findJobById(id) {
+    return jobs.find((job) => job.id === id) || null;
+  }
 
   const STORAGE_KEYS = { options: "kef.options", lang: "kef.lang" };
 
@@ -195,10 +212,38 @@
         dom.fileInput.click();
       }
     });
-    dom.fileInput.addEventListener("change", () => selectFile(dom.fileInput.files?.[0] ?? null));
-    dom.removeFileButton.addEventListener("click", clearSelectedFile);
+    dom.fileInput.addEventListener("change", () => {
+      addFiles(dom.fileInput.files);
+      dom.fileInput.value = "";
+    });
     dom.recommendedButton.addEventListener("click", useRecommendedOptions);
-    dom.repairButton.addEventListener("click", repairSelectedFile);
+    dom.repairButton.addEventListener("click", repairAllFiles);
+    if (dom.downloadAllButton) dom.downloadAllButton.addEventListener("click", downloadAllOutputs);
+    if (dom.fileList) {
+      dom.fileList.addEventListener("click", (event) => {
+        const removeButton = event.target.closest("[data-remove-job]");
+        if (removeButton) {
+          event.stopPropagation();
+          removeJob(Number(removeButton.dataset.removeJob));
+          return;
+        }
+        const downloadButtonEl = event.target.closest("[data-download-job]");
+        if (downloadButtonEl) {
+          event.stopPropagation();
+          const job = findJobById(Number(downloadButtonEl.dataset.downloadJob));
+          if (job?.outputBlob) triggerBlobDownload(job.outputBlob, job.outputName || buildOutputName(job.inputFile.name));
+          return;
+        }
+        if (batchProcessing) return;
+        const row = event.target.closest("[data-job-id]");
+        if (!row) return;
+        const job = findJobById(Number(row.dataset.jobId));
+        if (!job) return;
+        setActiveJob(job);
+        renderFileList();
+        refreshResultPanelForActiveJob();
+      });
+    }
     if (dom.previewButton) dom.previewButton.addEventListener("click", openPreview);
     if (dom.previewClose) dom.previewClose.addEventListener("click", closePreview);
     if (dom.previewOverlay) {
@@ -232,7 +277,7 @@
         dom.dropZone.classList.remove("dragging");
       });
     }
-    dom.dropZone.addEventListener("drop", (event) => selectFile(event.dataTransfer?.files?.[0] ?? null));
+    dom.dropZone.addEventListener("drop", (event) => addFiles(event.dataTransfer?.files ?? null));
 
     document.querySelectorAll(".filter-button").forEach((button) => {
       button.addEventListener("click", () => {
@@ -321,64 +366,142 @@
   function refreshLocalizedInterface() {
     updateSeoMeta();
     if (dom.languageSelect) dom.languageSelect.value = i18n?.getLanguage() || "en";
-    if (state.inputFile) dom.fileSize.textContent = formatBytes(state.inputFile.size);
-    if (state.outputBlob && state.inputFile) {
+    if (state && state.outputBlob && state.inputFile) {
       state.outputName = buildOutputName(state.inputFile.name);
       const outputIssue = state.report.find((issue) => issue.code === "OUTPUT_READY");
       if (outputIssue) outputIssue.file = state.outputName;
     }
-    if (state.lastResult && !dom.resultState.classList.contains("hidden")) {
+    renderFileList();
+    updateBatchSummary();
+    if (state && state.lastResult && !dom.resultState.classList.contains("hidden")) {
       showResults(state.lastResult.fileCount, state.lastResult.hasOutput);
-    } else {
+    } else if (state) {
       renderReport();
     }
   }
 
-  function selectFile(file) {
-    if (!file) return;
-    const validExtension = file.name.toLowerCase().endsWith(".epub");
-    if (!validExtension) {
+  function refreshResultPanelForActiveJob() {
+    if (!state) {
+      if (dom.previewButton) dom.previewButton.classList.add("hidden");
+      dom.downloadButton.classList.add("hidden");
+      if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
+      if (dom.supportLink) dom.supportLink.classList.add("hidden");
+      if (dom.filenameField) dom.filenameField.classList.add("hidden");
+      showIdleState();
+      return;
+    }
+    if (dom.previewButton) dom.previewButton.classList.remove("hidden");
+    if (state.status === "processing") return;
+    if (state.lastResult) {
+      showResults(state.lastResult.fileCount, state.lastResult.hasOutput);
+    } else {
+      dom.downloadButton.classList.add("hidden");
+      if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
+      if (dom.supportLink) dom.supportLink.classList.add("hidden");
+      if (dom.filenameField) dom.filenameField.classList.add("hidden");
+      showIdleState();
+    }
+  }
+
+  function addFiles(fileList) {
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+    const validFiles = files.filter((file) => file.name.toLowerCase().endsWith(".epub"));
+    if (!validFiles.length) {
       window.alert(t("runtime.chooseEpub"));
       return;
     }
 
-    state.inputFile = file;
-    state.outputBlob = null;
-    state.outputName = "";
-    state.report = [];
-    state.reportDocument = null;
-    state.lastResult = null;
-    dom.fileName.textContent = file.name;
-    dom.fileSize.textContent = formatBytes(file.size);
-    dom.dropZone.classList.add("hidden");
-    dom.selectedFile.classList.remove("hidden");
-    dom.repairButton.disabled = false;
-    if (dom.previewButton) dom.previewButton.classList.remove("hidden");
-    dom.downloadButton.classList.add("hidden");
-    if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
-    if (dom.supportLink) dom.supportLink.classList.add("hidden");
-    if (dom.filenameField) dom.filenameField.classList.add("hidden");
-    showIdleState();
+    const hadJobs = jobs.length > 0;
+    for (const file of validFiles) {
+      const isDuplicate = jobs.some((job) => job.inputFile.name === file.name && job.inputFile.size === file.size);
+      if (isDuplicate) continue;
+      jobs.push(createJob(file));
+    }
+    if (!hadJobs && jobs.length) setActiveJob(jobs[0]);
+
+    dom.repairButton.disabled = jobs.length === 0 || batchProcessing;
+    renderFileList();
+    refreshResultPanelForActiveJob();
+    updateBatchSummary();
   }
 
-  function clearSelectedFile() {
-    if (state.processing) return;
-    state.inputFile = null;
-    state.outputBlob = null;
-    state.outputName = "";
-    state.report = [];
-    state.reportDocument = null;
-    state.lastResult = null;
-    dom.fileInput.value = "";
-    dom.dropZone.classList.remove("hidden");
-    dom.selectedFile.classList.add("hidden");
-    dom.repairButton.disabled = true;
-    if (dom.previewButton) dom.previewButton.classList.add("hidden");
-    dom.downloadButton.classList.add("hidden");
-    if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
-    if (dom.supportLink) dom.supportLink.classList.add("hidden");
-    if (dom.filenameField) dom.filenameField.classList.add("hidden");
-    showIdleState();
+  function removeJob(id) {
+    if (batchProcessing) return;
+    const index = jobs.findIndex((job) => job.id === id);
+    if (index === -1) return;
+    const wasActive = state && state.id === id;
+    jobs.splice(index, 1);
+    if (wasActive) setActiveJob(jobs[0] || null);
+
+    dom.repairButton.disabled = jobs.length === 0;
+    renderFileList();
+    refreshResultPanelForActiveJob();
+    updateBatchSummary();
+  }
+
+  function renderFileList() {
+    if (!dom.fileList) return;
+    if (!jobs.length) {
+      dom.fileList.innerHTML = "";
+      dom.fileList.classList.add("hidden");
+      return;
+    }
+    dom.fileList.classList.remove("hidden");
+    dom.fileList.innerHTML = jobs.map((job) => {
+      const statusSymbol = job.status === "processing" ? "…"
+        : job.status === "success" ? "✓"
+        : job.status === "warning" ? "△"
+        : job.status === "error" ? "!" : "";
+      const isActive = Boolean(state && state.id === job.id);
+      const downloadButtonHtml = job.outputBlob
+        ? `<button class="text-button" type="button" data-download-job="${job.id}">${escapeHtml(t("button.download"))}</button>`
+        : "";
+      return `<div class="file-row status-${job.status}${isActive ? " active" : ""}" data-job-id="${job.id}">
+        <div class="file-status" aria-hidden="true">${statusSymbol}</div>
+        <div class="file-details">
+          <strong>${escapeHtml(job.inputFile.name)}</strong>
+          <span>${escapeHtml(formatBytes(job.inputFile.size))} · ${escapeHtml(t(`fileList.status.${job.status}`))}</span>
+        </div>
+        ${downloadButtonHtml}
+        <button class="icon-button" type="button" data-remove-job="${job.id}" aria-label="${escapeHtml(t("upload.remove"))}"${batchProcessing ? " disabled" : ""}>×</button>
+      </div>`;
+    }).join("");
+  }
+
+  function updateBatchSummary() {
+    if (!dom.batchSummary || !dom.batchSummaryText) return;
+    if (jobs.length < 2) {
+      dom.batchSummary.classList.add("hidden");
+      if (dom.downloadAllButton) dom.downloadAllButton.classList.add("hidden");
+      return;
+    }
+    dom.batchSummary.classList.remove("hidden");
+    const ok = jobs.filter((job) => job.status === "success").length;
+    const warning = jobs.filter((job) => job.status === "warning").length;
+    const error = jobs.filter((job) => job.status === "error").length;
+    dom.batchSummaryText.textContent = t("batch.summary", { total: jobs.length, ok, warning, error });
+    if (dom.downloadAllButton) dom.downloadAllButton.classList.toggle("hidden", !jobs.some((job) => job.outputBlob));
+  }
+
+  async function downloadAllOutputs() {
+    const withOutput = jobs.filter((job) => job.outputBlob);
+    if (!withOutput.length) return;
+    const zip = new JSZip();
+    const usedNames = new Set();
+    for (const job of withOutput) {
+      const baseName = job.outputName || buildOutputName(job.inputFile.name);
+      let finalName = baseName;
+      let suffix = 2;
+      while (usedNames.has(finalName)) {
+        finalName = baseName.replace(/\.epub$/i, ` (${suffix}).epub`);
+        suffix += 1;
+      }
+      usedNames.add(finalName);
+      zip.file(finalName, job.outputBlob, { binary: true });
+    }
+    const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
+    triggerBlobDownload(blob, `${t("filename.batchZip")}.zip`);
   }
 
   function useRecommendedOptions() {
@@ -412,11 +535,15 @@
     dom.resultState.classList.add("hidden");
   }
 
+  let currentBatchInfo = null;
+
   function showProgress(label, percent, detail) {
     dom.idleState.classList.add("hidden");
     dom.resultState.classList.add("hidden");
     dom.progressState.classList.remove("hidden");
-    dom.progressLabel.textContent = label;
+    dom.progressLabel.textContent = currentBatchInfo && currentBatchInfo.total > 1
+      ? t("progress.batchLabel", { current: currentBatchInfo.position, total: currentBatchInfo.total, label })
+      : label;
     dom.progressPercent.textContent = `${Math.max(0, Math.min(100, Math.round(percent)))}%`;
     dom.progressBar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
     dom.progressDetail.textContent = detail;
@@ -431,20 +558,12 @@
     return new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
   }
 
-  async function repairSelectedFile() {
-    if (!state.inputFile || state.processing) return;
-
-    state.processing = true;
-    state.outputBlob = null;
-    state.report = [];
-    state.reportDocument = null;
-    state.lastResult = null;
-    dom.repairButton.disabled = true;
-    if (dom.languageSelect) dom.languageSelect.disabled = true;
-    dom.downloadButton.classList.add("hidden");
-    if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
-    if (dom.supportLink) dom.supportLink.classList.add("hidden");
-    if (dom.filenameField) dom.filenameField.classList.add("hidden");
+  async function repairJob(job) {
+    state = job;
+    job.outputBlob = null;
+    job.report = [];
+    job.reportDocument = null;
+    job.lastResult = null;
     const options = readOptions();
 
     try {
@@ -667,17 +786,59 @@
         packageResult: null
       });
       showResults(0, false);
-    } finally {
-      state.processing = false;
-      dom.repairButton.disabled = !state.inputFile;
-      if (dom.languageSelect) dom.languageSelect.disabled = false;
     }
+  }
+
+  function deriveJobStatus(job) {
+    if (!job.lastResult) return "pending";
+    if (!job.lastResult.hasOutput) return "error";
+    const hasError = job.report.some((issue) => issue.level === "error");
+    return hasError ? "warning" : "success";
+  }
+
+  async function repairAllFiles() {
+    if (batchProcessing || jobs.length === 0) return;
+    const pendingJobs = jobs.filter((job) => job.status === "pending");
+    if (!pendingJobs.length) return;
+
+    batchProcessing = true;
+    dom.repairButton.disabled = true;
+    if (dom.languageSelect) dom.languageSelect.disabled = true;
+
+    for (let index = 0; index < pendingJobs.length; index += 1) {
+      const job = pendingJobs[index];
+      currentBatchInfo = { position: index + 1, total: pendingJobs.length };
+      setActiveJob(job);
+      job.status = "processing";
+      renderFileList();
+      dom.downloadButton.classList.add("hidden");
+      if (dom.sendToKindleLink) dom.sendToKindleLink.classList.add("hidden");
+      if (dom.supportLink) dom.supportLink.classList.add("hidden");
+      if (dom.filenameField) dom.filenameField.classList.add("hidden");
+
+      await repairJob(job);
+
+      job.status = deriveJobStatus(job);
+      renderFileList();
+      updateBatchSummary();
+    }
+
+    currentBatchInfo = null;
+    batchProcessing = false;
+    dom.repairButton.disabled = jobs.length === 0;
+    if (dom.languageSelect) dom.languageSelect.disabled = false;
+
+    const firstError = jobs.find((job) => job.status === "error");
+    setActiveJob(firstError || pendingJobs[pendingJobs.length - 1]);
+    renderFileList();
+    refreshResultPanelForActiveJob();
+    updateBatchSummary();
   }
 
   const previewState = { zip: null, chapters: [], index: 0, mode: "original", cache: new Map(), baseHtml: null };
 
   async function openPreview() {
-    if (!state.inputFile || !dom.previewOverlay) return;
+    if (!state || !state.inputFile || !dom.previewOverlay) return;
     let spine = null;
     let zip = null;
     try {
@@ -1917,12 +2078,13 @@
   }
 
   function downloadOutput() {
-    if (!state.outputBlob) return;
+    if (!state || !state.outputBlob) return;
     triggerBlobDownload(state.outputBlob, resolveChosenOutputFilename());
   }
 
 
   function downloadReport() {
+    if (!state) return;
     const baseDocument = state.reportDocument || createReportDocument({
       options: readOptions(), inputFile: state.inputFile, outputName: state.outputName || null,
       outputSize: state.outputBlob?.size || null, fileCount: state.lastResult?.fileCount || 0, packageResult: null
