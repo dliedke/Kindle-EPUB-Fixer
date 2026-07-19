@@ -12,6 +12,7 @@
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include=".firebaserc" />
+    <None Include="CLAUDE.md" />
     <None Include="firebase.json" />
     <None Include="deploy.cmd" />
     <None Include="sitemap.xml" />
