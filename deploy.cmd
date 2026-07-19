@@ -1,6 +1,18 @@
 @echo off
 setlocal
 
+echo Gerando sitemap.xml a partir de LANGUAGE_META...
+where node >nul 2>nul
+if errorlevel 1 (
+    echo Node.js nao encontrado. Instale o Node ou gere o sitemap manualmente.
+    exit /b 1
+)
+call node tools\generate-sitemap.js
+if errorlevel 1 (
+    echo Geracao do sitemap falhou. Deploy abortado.
+    exit /b 1
+)
+
 echo Copiando arquivos do app para public...
 copy /Y index.html public\ >nul
 copy /Y app.js public\ >nul
