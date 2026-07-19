@@ -1243,7 +1243,7 @@
       }
 
       if (options.repairText && /(?:https?:)?\/\//i.test(text)) {
-        const remoteMatches = text.match(/(?:src|href)\s*=\s*["'](?:https?:)?\/\//gi);
+        const remoteMatches = text.match(/<(?:img|image|link|script|audio|video|source)\b[^>]*\b(?:src|href|xlink:href)\s*=\s*["'](?:https?:)?\/\//gi);
         if (remoteMatches?.length) {
           addIssue("warning", "O documento possui recursos remotos; o Kindle pode ignorá-los quando estiver offline.", newPath, "REMOTE_RESOURCES");
         }
