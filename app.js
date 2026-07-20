@@ -2216,8 +2216,27 @@
   }
 
   function buildOutputName(inputName) {
-    const base = inputName.replace(/\.epub$/i, "");
-    return `${sanitizeDownloadBase(base)}-${t("filename.fixedSuffix")}.epub`;
+    const base = stripAdvertParens(inputName.replace(/\.epub$/i, ""));
+    // Preserva acentos, espacos e parenteses legitimos; so remove o que o sistema de arquivos proibe
+    const safe = base
+      .replace(/[\\/:*?"<>|]+/g, "-")
+      .replace(/\s{2,}/g, " ")
+      .replace(/^[-.\s]+|[-.\s]+$/g, "")
+      .trim();
+    return `${safe || t("filename.defaultBook")}.epub`;
+  }
+
+  // Remove parenteses com propaganda de sites de download (ex.: "(z-library.sk, 1lib.sk, z-lib.sk)")
+  function stripAdvertParens(value) {
+    // Palavras/dominios tipicos de sites piratas de ebooks
+    const advertPattern = /\b(?:z-?lib(?:rary)?|1lib|b-?ok|libgen|anna(?:'?s)?-?archive|oceanofpdf|pdfdrive|epubs?|ebooks?|[\w-]+\.(?:sk|org|com|net|io|cc|to|me|info|xyz|club|se|ru|is|st|li|onion))\b/i;
+    // Remove qualquer grupo entre () ou [] cujo conteudo bata no padrao de propaganda
+    return value
+      .replace(/\s*[([][^()[\]]*[)\]]/g, (group) =>
+        advertPattern.test(group) ? "" : group
+      )
+      .replace(/\s{2,}/g, " ")
+      .trim();
   }
 
   function sanitizeDownloadBase(value) {
