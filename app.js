@@ -323,13 +323,18 @@
     const description = t("hero.copy");
     const title = t("document.title");
     const locale = (i18n?.getLocale?.() || "en-US").replace("-", "_");
-    const canonicalUrl = urlLanguageParamActive ? `${SITE_ORIGIN}/?lang=${code}` : `${SITE_ORIGIN}/`;
+    // O canonico aponta SEMPRE para a raiz: as variantes ?lang=xx servem o mesmo
+    // HTML (o idioma e trocado por JS), entao consolidamos tudo numa unica pagina
+    // indexavel. Auto-referenciar ?lang gerava "Copia sem pagina canonica" no GSC.
+    const canonicalUrl = `${SITE_ORIGIN}/`;
+    // og:url pode refletir o idioma corrente para compartilhamento social.
+    const socialUrl = urlLanguageParamActive ? `${SITE_ORIGIN}/?lang=${code}` : `${SITE_ORIGIN}/`;
 
     setMetaAttribute('meta[name="description"]', "content", description);
     setMetaAttribute('link[rel="canonical"]', "href", canonicalUrl);
     setMetaAttribute('meta[property="og:title"]', "content", title);
     setMetaAttribute('meta[property="og:description"]', "content", description);
-    setMetaAttribute('meta[property="og:url"]', "content", canonicalUrl);
+    setMetaAttribute('meta[property="og:url"]', "content", socialUrl);
     setMetaAttribute('meta[property="og:locale"]', "content", locale);
     setMetaAttribute('meta[name="twitter:title"]', "content", title);
     setMetaAttribute('meta[name="twitter:description"]', "content", description);
