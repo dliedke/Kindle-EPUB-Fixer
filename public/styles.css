@@ -188,6 +188,19 @@ h1 {
 .icon-button:hover { background: rgba(251, 113, 133, 0.1); color: var(--danger); }
 
 .file-list { display: grid; gap: 10px; margin-top: 16px; }
+.file-name-input {
+  width: 100%;
+  min-height: 34px;
+  margin-top: 4px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(17, 24, 39, 0.78);
+  color: var(--text);
+  font-size: 0.84rem;
+}
+.file-name-input:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+.file-row-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
 .file-row {
   display: flex;
   align-items: center;
