@@ -518,6 +518,23 @@ footer { display: flex; justify-content: space-between; gap: 16px; padding: 23px
   .notes-grid { grid-template-columns: 1fr; }
   .action-buttons { flex-direction: column; }
   .primary-button, .secondary-button { width: 100%; }
+
+  /* Em telas estreitas a linha vira grade: nome/campo em cima, acoes embaixo */
+  .file-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 6px 12px;
+    padding: 14px;
+  }
+  .file-status { grid-column: 1; grid-row: 1; margin-top: 2px; }
+  .file-details { grid-column: 2; grid-row: 1; }
+  .file-row > .icon-button { grid-column: 3; grid-row: 1; }
+  .file-row-actions { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; gap: 4px; }
+  /* Sem ellipsis: o nome completo cabe quebrando em varias linhas */
+  .file-details strong { white-space: normal; overflow-wrap: anywhere; }
+  /* 16px evita o zoom automatico do iOS ao focar o campo */
+  .file-name-input { min-height: 42px; margin-top: 8px; font-size: 16px; }
 }
 
 .header-actions {
