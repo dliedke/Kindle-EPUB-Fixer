@@ -83,6 +83,7 @@
     recommendedButton: document.getElementById("recommendedButton"),
     applyOptionsToAllButton: document.getElementById("applyOptionsToAllButton"),
     settingsScope: document.getElementById("settingsScope"),
+    settingsPanel: document.getElementById("settingsPanel"),
     idleState: document.getElementById("idleState"),
     progressState: document.getElementById("progressState"),
     resultState: document.getElementById("resultState"),
@@ -234,13 +235,42 @@
     if (dom.outputFilenameInput) {
       // O nome digitado pertence ao arquivo selecionado, nao a interface toda.
       dom.outputFilenameInput.addEventListener("input", () => {
-        if (state) state.customName = dom.outputFilenameInput.value;
+        if (!state) return;
+        state.customName = dom.outputFilenameInput.value;
+        const rowInput = dom.fileList?.querySelector(`[data-name-job="${state.id}"]`);
+        if (rowInput) rowInput.value = dom.outputFilenameInput.value;
       });
     }
     dom.repairButton.addEventListener("click", repairAllFiles);
     if (dom.downloadAllButton) dom.downloadAllButton.addEventListener("click", downloadAllOutputs);
     if (dom.fileList) {
+      dom.fileList.addEventListener("input", (event) => {
+        const nameInput = event.target.closest("[data-name-job]");
+        if (!nameInput) return;
+        const job = findJobById(Number(nameInput.dataset.nameJob));
+        if (!job) return;
+        job.customName = nameInput.value;
+        if (state && state.id === job.id && dom.outputFilenameInput) dom.outputFilenameInput.value = nameInput.value;
+      });
       dom.fileList.addEventListener("click", (event) => {
+        // Clicar no campo de nome nao deve disparar a selecao da linha duas vezes nem roubar o foco
+        const nameInput = event.target.closest("[data-name-job]");
+        if (nameInput) {
+          event.stopPropagation();
+          const job = findJobById(Number(nameInput.dataset.nameJob));
+          if (!job || (state && state.id === job.id)) return;
+          setActiveJob(job);
+          renderFileList();
+          refreshResultPanelForActiveJob();
+          focusJobNameInput(job.id);
+          return;
+        }
+        const settingsButton = event.target.closest("[data-settings-job]");
+        if (settingsButton) {
+          event.stopPropagation();
+          openSettingsForJob(Number(settingsButton.dataset.settingsJob));
+          return;
+        }
         const removeButton = event.target.closest("[data-remove-job]");
         if (removeButton) {
           event.stopPropagation();
@@ -485,16 +515,48 @@
       const downloadButtonHtml = job.outputBlob
         ? `<button class="text-button" type="button" data-download-job="${job.id}">${escapeHtml(t("button.download"))}</button>`
         : "";
+      // Em lote o nome de saida fica na propria linha, ao lado do botao de baixar
+      const nameInputHtml = jobs.length > 1 && job.outputBlob
+        ? `<input class="file-name-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off"
+            data-name-job="${job.id}" aria-label="${escapeHtml(t("result.filenameLabel"))}"
+            placeholder="${escapeHtml(resolveOutputFilename(job))}" value="${escapeHtml(job.customName || job.outputName || "")}">`
+        : "";
       return `<div class="file-row status-${job.status}${isActive ? " active" : ""}" data-job-id="${job.id}">
         <div class="file-status" aria-hidden="true">${statusSymbol}</div>
         <div class="file-details">
           <strong>${escapeHtml(job.inputFile.name)}</strong>
           <span>${escapeHtml(formatBytes(job.inputFile.size))} · ${escapeHtml(t(`fileList.status.${job.status}`))}</span>
+          ${nameInputHtml}
         </div>
-        ${downloadButtonHtml}
+        <div class="file-row-actions">
+          <button class="text-button" type="button" data-settings-job="${job.id}"${batchProcessing ? " disabled" : ""}>${escapeHtml(t("fileList.settings"))}</button>
+          ${downloadButtonHtml}
+        </div>
         <button class="icon-button" type="button" data-remove-job="${job.id}" aria-label="${escapeHtml(t("upload.remove"))}"${batchProcessing ? " disabled" : ""}>×</button>
       </div>`;
     }).join("");
+  }
+
+  // Atalho da lista: seleciona o arquivo, abre o painel de correcoes e rola ate ele
+  function openSettingsForJob(id) {
+    const job = findJobById(id);
+    if (!job || batchProcessing) return;
+    if (!state || state.id !== job.id) {
+      setActiveJob(job);
+      renderFileList();
+      refreshResultPanelForActiveJob();
+    }
+    if (!dom.settingsPanel) return;
+    dom.settingsPanel.open = true;
+    dom.settingsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function focusJobNameInput(id) {
+    const input = dom.fileList?.querySelector(`[data-name-job="${id}"]`);
+    if (!input) return;
+    input.focus();
+    const end = input.value.length;
+    input.setSelectionRange(end, end);
   }
 
   function updateBatchSummary() {
@@ -2103,7 +2165,9 @@
       if (dom.filenameField) dom.filenameField.classList.add("hidden");
     }
     if (jobs.length > 1) {
+      // Em lote, download e nome de saida ficam na linha de cada arquivo
       dom.downloadButton.classList.add("hidden");
+      if (dom.filenameField) dom.filenameField.classList.add("hidden");
     }
     if (dom.reportDetails) dom.reportDetails.open = !hasOutput || stats.errors > 0;
     renderReport();
