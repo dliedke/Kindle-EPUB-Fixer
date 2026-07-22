@@ -81,6 +81,8 @@
     batchSummaryText: document.getElementById("batchSummaryText"),
     downloadAllButton: document.getElementById("downloadAllButton"),
     recommendedButton: document.getElementById("recommendedButton"),
+    applyOptionsToAllButton: document.getElementById("applyOptionsToAllButton"),
+    settingsScope: document.getElementById("settingsScope"),
     idleState: document.getElementById("idleState"),
     progressState: document.getElementById("progressState"),
     resultState: document.getElementById("resultState"),
@@ -129,6 +131,10 @@
       inputFile: file,
       outputBlob: null,
       outputName: "",
+      // Nome digitado pelo usuario para este arquivo especifico (vazio = usa outputName)
+      customName: "",
+      // Cada arquivo carrega sua propria copia das opcoes de reparo
+      options: readOptions(),
       report: [],
       reportFilter: "all",
       reportDocument: null,
@@ -141,8 +147,15 @@
   let state = null;
   let batchProcessing = false;
 
+  // Trocar o job ativo tambem troca o conjunto de opcoes exibido no painel,
+  // ja que as checkboxes representam sempre o arquivo selecionado.
   function setActiveJob(job) {
     state = job;
+    if (job) {
+      applyOptionsToUi(job.options);
+      if (dom.outputFilenameInput) dom.outputFilenameInput.value = job.customName || job.outputName || "";
+    }
+    updateSettingsScope();
   }
 
   function findJobById(id) {
@@ -217,6 +230,13 @@
       dom.fileInput.value = "";
     });
     dom.recommendedButton.addEventListener("click", useRecommendedOptions);
+    if (dom.applyOptionsToAllButton) dom.applyOptionsToAllButton.addEventListener("click", applyOptionsToAllJobs);
+    if (dom.outputFilenameInput) {
+      // O nome digitado pertence ao arquivo selecionado, nao a interface toda.
+      dom.outputFilenameInput.addEventListener("input", () => {
+        if (state) state.customName = dom.outputFilenameInput.value;
+      });
+    }
     dom.repairButton.addEventListener("click", repairAllFiles);
     if (dom.downloadAllButton) dom.downloadAllButton.addEventListener("click", downloadAllOutputs);
     if (dom.fileList) {
@@ -231,7 +251,7 @@
         if (downloadButtonEl) {
           event.stopPropagation();
           const job = findJobById(Number(downloadButtonEl.dataset.downloadJob));
-          if (job?.outputBlob) triggerBlobDownload(job.outputBlob, job.outputName || buildOutputName(job.inputFile.name));
+          if (job?.outputBlob) triggerBlobDownload(job.outputBlob, resolveOutputFilename(job));
           return;
         }
         if (batchProcessing) return;
@@ -291,7 +311,7 @@
 
     applyStoredOptions();
     for (const id of optionIds) {
-      document.getElementById(id)?.addEventListener("change", persistOptions);
+      document.getElementById(id)?.addEventListener("change", onOptionChanged);
     }
   }
 
@@ -378,6 +398,7 @@
     }
     renderFileList();
     updateBatchSummary();
+    updateSettingsScope();
     if (state && state.lastResult && !dom.resultState.classList.contains("hidden")) {
       showResults(state.lastResult.fileCount, state.lastResult.hasOutput);
     } else if (state) {
@@ -429,6 +450,7 @@
     renderFileList();
     refreshResultPanelForActiveJob();
     updateBatchSummary();
+    updateSettingsScope();
   }
 
   function removeJob(id) {
@@ -443,6 +465,7 @@
     renderFileList();
     refreshResultPanelForActiveJob();
     updateBatchSummary();
+    updateSettingsScope();
   }
 
   function renderFileList() {
@@ -495,7 +518,7 @@
     const zip = new JSZip();
     const usedNames = new Set();
     for (const job of withOutput) {
-      const baseName = job.outputName || buildOutputName(job.inputFile.name);
+      const baseName = resolveOutputFilename(job);
       let finalName = baseName;
       let suffix = 2;
       while (usedNames.has(finalName)) {
@@ -528,11 +551,78 @@
       const element = document.getElementById(id);
       if (element) element.checked = checked;
     }
-    persistOptions();
+    onOptionChanged();
   }
 
   function readOptions() {
     return Object.fromEntries(optionIds.map((id) => [id, Boolean(document.getElementById(id)?.checked)]));
+  }
+
+  function applyOptionsToUi(options) {
+    if (!options) return;
+    for (const id of optionIds) {
+      const element = document.getElementById(id);
+      if (element && typeof options[id] === "boolean" && !element.disabled) element.checked = options[id];
+    }
+  }
+
+  function optionsDiffer(a, b) {
+    return optionIds.some((id) => Boolean(a?.[id]) !== Boolean(b?.[id]));
+  }
+
+  // Mexer nas opcoes de um arquivo ja processado invalida o resultado:
+  // ele volta para "pendente" e e reprocessado no proximo "Analisar e reparar".
+  function resetJobResult(job) {
+    job.outputBlob = null;
+    job.outputName = "";
+    job.report = [];
+    job.reportDocument = null;
+    job.lastResult = null;
+    job.status = "pending";
+  }
+
+  function onOptionChanged() {
+    persistOptions();
+    if (batchProcessing || !state) return;
+    const options = readOptions();
+    const changed = optionsDiffer(state.options, options);
+    state.options = options;
+    if (!changed || state.status === "pending") return;
+    resetJobResult(state);
+    dom.repairButton.disabled = jobs.length === 0;
+    renderFileList();
+    updateBatchSummary();
+    refreshResultPanelForActiveJob();
+  }
+
+  function applyOptionsToAllJobs() {
+    if (batchProcessing || !jobs.length) return;
+    const options = readOptions();
+    let invalidated = false;
+    for (const job of jobs) {
+      const changed = optionsDiffer(job.options, options);
+      job.options = { ...options };
+      if (changed && job.status !== "pending") {
+        resetJobResult(job);
+        invalidated = true;
+      }
+    }
+    if (!invalidated) return;
+    dom.repairButton.disabled = jobs.length === 0;
+    renderFileList();
+    updateBatchSummary();
+    refreshResultPanelForActiveJob();
+  }
+
+  // Em lote, o painel de correcoes precisa dizer a qual arquivo ele se refere.
+  function updateSettingsScope() {
+    const multiple = jobs.length > 1;
+    if (dom.settingsScope) {
+      const visible = multiple && Boolean(state);
+      dom.settingsScope.classList.toggle("hidden", !visible);
+      dom.settingsScope.textContent = visible ? t("settings.scope", { file: state.inputFile.name }) : "";
+    }
+    if (dom.applyOptionsToAllButton) dom.applyOptionsToAllButton.classList.toggle("hidden", !multiple);
   }
 
   function showIdleState() {
@@ -570,7 +660,9 @@
     job.report = [];
     job.reportDocument = null;
     job.lastResult = null;
-    const options = readOptions();
+    // Cada arquivo e reparado com as opcoes que estao gravadas nele
+    const options = job.options || readOptions();
+    job.options = options;
 
     try {
       await updateProgress(t("progress.opening.label"), 3, t("progress.opening.detail"));
@@ -2147,13 +2239,17 @@
 
   function showFilenameField() {
     if (!dom.filenameField || !dom.outputFilenameInput) return;
-    dom.outputFilenameInput.value = state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`;
+    dom.outputFilenameInput.value = state.customName
+      || state.outputName
+      || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`;
     dom.filenameField.classList.remove("hidden");
   }
 
-  function resolveChosenOutputFilename() {
-    const fallback = state.outputName || `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`;
-    const typed = dom.outputFilenameInput?.value?.trim();
+  // Resolve o nome final de um job: o que o usuario digitou para ele, ou o nome derivado do original.
+  function resolveOutputFilename(job) {
+    const fallback = job.outputName
+      || (job.inputFile ? buildOutputName(job.inputFile.name) : `${t("filename.defaultBook")}-${t("filename.fixedSuffix")}.epub`);
+    const typed = (job.customName || "").trim();
     if (!typed) return fallback;
     const withExtension = /\.epub$/i.test(typed) ? typed : `${typed}.epub`;
     const safe = withExtension.replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, " ").trim();
@@ -2162,7 +2258,8 @@
 
   function downloadOutput() {
     if (!state || !state.outputBlob) return;
-    triggerBlobDownload(state.outputBlob, resolveChosenOutputFilename());
+    if (dom.outputFilenameInput) state.customName = dom.outputFilenameInput.value;
+    triggerBlobDownload(state.outputBlob, resolveOutputFilename(state));
   }
 
 

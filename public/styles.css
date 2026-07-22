@@ -454,7 +454,9 @@ legend {
 .collapsible-panel > summary h2 { margin: 0; font-size: 1.22rem; }
 .collapsible-hint { color: var(--muted); font-size: 0.78rem; white-space: nowrap; }
 .collapsible-body { padding: 20px 25px 25px; }
-.collapsible-body-header { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+.collapsible-body-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.collapsible-body-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-left: auto; }
+.settings-scope { margin: 0; color: var(--muted); font-size: 0.82rem; font-weight: 700; overflow-wrap: anywhere; }
 
 .notes-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .notes-grid article { padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: rgba(17, 24, 39, 0.56); }
