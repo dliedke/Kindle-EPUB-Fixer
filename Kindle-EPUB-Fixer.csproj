@@ -10,7 +10,7 @@
     <Content Include="**\*.html;**\*.js;**\*.css" Exclude=".git\**;.vs\**;.firebase\**;.agents\**;.claude\**;bin\**;obj\**;node_modules\**" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="public\sitemap.txt" />
+    <Content Include="sitemap.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -18,7 +18,7 @@
     <None Include="CLAUDE.md" />
     <None Include="firebase.json" />
     <None Include="deploy.cmd" />
-    <None Include="public\robots.txt" />
+    <None Include="robots.txt" />
     <None Include="README.md" />
     <None Include="LICENSE.txt" />
   </ItemGroup>
