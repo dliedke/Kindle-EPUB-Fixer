@@ -1,88 +1,67 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark light">
-  <meta name="theme-color" content="#111827">
-  <title>Kindle EPUB Fixer</title>
-  <meta name="description" content="Corrija arquivos EPUB para o Kindle direto no navegador: analisa, corrige e reconstrói o pacote para aumentar a compatibilidade com o Send to Kindle. 100% local, sem upload.">
-  <link rel="canonical" href="https://kindle-epub-fixer.web.app/">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#111827">
+    <title>Kindle EPUB Fixer</title>
+    <meta name="description" content="Corrija arquivos EPUB para o Kindle direto no navegador: analisa, corrige e reconstrói o pacote para aumentar a compatibilidade com o Send to Kindle. 100% local, sem upload.">
+    <link rel="canonical" href="https://kindle-epub-fixer.web.app/">
 
-  <!-- hreflang: uma URL por idioma (?lang=xx) + x-default para deteccao automatica pelo navegador -->
-  <link rel="alternate" hreflang="x-default" href="https://kindle-epub-fixer.web.app/">
-  <link rel="alternate" hreflang="en" href="https://kindle-epub-fixer.web.app/?lang=en">
-  <link rel="alternate" hreflang="zh-CN" href="https://kindle-epub-fixer.web.app/?lang=zh">
-  <link rel="alternate" hreflang="hi" href="https://kindle-epub-fixer.web.app/?lang=hi">
-  <link rel="alternate" hreflang="es" href="https://kindle-epub-fixer.web.app/?lang=es">
-  <link rel="alternate" hreflang="fr" href="https://kindle-epub-fixer.web.app/?lang=fr">
-  <link rel="alternate" hreflang="ar" href="https://kindle-epub-fixer.web.app/?lang=ar">
-  <link rel="alternate" hreflang="bn" href="https://kindle-epub-fixer.web.app/?lang=bn">
-  <link rel="alternate" hreflang="pt-BR" href="https://kindle-epub-fixer.web.app/?lang=pt">
-  <link rel="alternate" hreflang="ru" href="https://kindle-epub-fixer.web.app/?lang=ru">
-  <link rel="alternate" hreflang="ur" href="https://kindle-epub-fixer.web.app/?lang=ur">
-  <link rel="alternate" hreflang="id" href="https://kindle-epub-fixer.web.app/?lang=id">
-  <link rel="alternate" hreflang="de" href="https://kindle-epub-fixer.web.app/?lang=de">
-  <link rel="alternate" hreflang="nl" href="https://kindle-epub-fixer.web.app/?lang=nl">
-  <link rel="alternate" hreflang="ja" href="https://kindle-epub-fixer.web.app/?lang=ja">
-  <link rel="alternate" hreflang="tr" href="https://kindle-epub-fixer.web.app/?lang=tr">
-  <link rel="alternate" hreflang="ko" href="https://kindle-epub-fixer.web.app/?lang=ko">
-  <link rel="alternate" hreflang="vi" href="https://kindle-epub-fixer.web.app/?lang=vi">
-  <link rel="alternate" hreflang="it" href="https://kindle-epub-fixer.web.app/?lang=it">
-  <link rel="alternate" hreflang="mr" href="https://kindle-epub-fixer.web.app/?lang=mr">
-  <link rel="alternate" hreflang="te" href="https://kindle-epub-fixer.web.app/?lang=te">
-  <link rel="alternate" hreflang="ta" href="https://kindle-epub-fixer.web.app/?lang=ta">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://kindle-epub-fixer.web.app/">
 
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Kindle EPUB Fixer">
-  <meta property="og:title" content="Kindle EPUB Fixer">
-  <meta property="og:description" content="Corrija arquivos EPUB para o Kindle direto no navegador: analisa, corrige e reconstrói o pacote para aumentar a compatibilidade com o Send to Kindle. 100% local, sem upload.">
-  <meta property="og:url" content="https://kindle-epub-fixer.web.app/">
-  <meta property="og:locale" content="pt_BR">
-  <meta property="og:locale:alternate" content="en_US">
-  <meta property="og:locale:alternate" content="zh_CN">
-  <meta property="og:locale:alternate" content="hi_IN">
-  <meta property="og:locale:alternate" content="es_ES">
-  <meta property="og:locale:alternate" content="fr_FR">
-  <meta property="og:locale:alternate" content="ar_AR">
-  <meta property="og:locale:alternate" content="bn_BD">
-  <meta property="og:locale:alternate" content="ru_RU">
-  <meta property="og:locale:alternate" content="ur_PK">
-  <meta property="og:locale:alternate" content="id_ID">
-  <meta property="og:locale:alternate" content="de_DE">
-  <meta property="og:locale:alternate" content="nl_NL">
-  <meta property="og:locale:alternate" content="ja_JP">
-  <meta property="og:locale:alternate" content="tr_TR">
-  <meta property="og:locale:alternate" content="ko_KR">
-  <meta property="og:locale:alternate" content="vi_VN">
-  <meta property="og:locale:alternate" content="it_IT">
-  <meta property="og:locale:alternate" content="mr_IN">
-  <meta property="og:locale:alternate" content="te_IN">
-  <meta property="og:locale:alternate" content="ta_IN">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Kindle EPUB Fixer">
-  <meta name="twitter:description" content="Corrija arquivos EPUB para o Kindle direto no navegador: analisa, corrige e reconstrói o pacote para aumentar a compatibilidade com o Send to Kindle. 100% local, sem upload.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Kindle EPUB Fixer">
+    <meta property="og:title" content="Kindle EPUB Fixer">
+    <meta property="og:description" content="Corrija arquivos EPUB para o Kindle direto no navegador: analisa, corrige e reconstrói o pacote para aumentar a compatibilidade com o Send to Kindle. 100% local, sem upload.">
+    <meta property="og:url" content="https://kindle-epub-fixer.web.app/">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta property="og:locale:alternate" content="zh_CN">
+    <meta property="og:locale:alternate" content="hi_IN">
+    <meta property="og:locale:alternate" content="es_ES">
+    <meta property="og:locale:alternate" content="fr_FR">
+    <meta property="og:locale:alternate" content="ar_AR">
+    <meta property="og:locale:alternate" content="bn_BD">
+    <meta property="og:locale:alternate" content="ru_RU">
+    <meta property="og:locale:alternate" content="ur_PK">
+    <meta property="og:locale:alternate" content="id_ID">
+    <meta property="og:locale:alternate" content="de_DE">
+    <meta property="og:locale:alternate" content="nl_NL">
+    <meta property="og:locale:alternate" content="ja_JP">
+    <meta property="og:locale:alternate" content="tr_TR">
+    <meta property="og:locale:alternate" content="ko_KR">
+    <meta property="og:locale:alternate" content="vi_VN">
+    <meta property="og:locale:alternate" content="it_IT">
+    <meta property="og:locale:alternate" content="mr_IN">
+    <meta property="og:locale:alternate" content="te_IN">
+    <meta property="og:locale:alternate" content="ta_IN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Kindle EPUB Fixer">
+    <meta name="twitter:description" content="Corrija arquivos EPUB para o Kindle direto no navegador: analisa, corrige e reconstrói o pacote para aumentar a compatibilidade com o Send to Kindle. 100% local, sem upload.">
 
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c3aed'/%3E%3Cstop offset='1' stop-color='%234f46e5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Cpath d='M14 20c0-3 3-5 8-5s10 2 10 2v30s-5-2-10-2-8 2-8 2V20z' fill='%23fff'/%3E%3Cpath d='M50 20c0-3-3-5-8-5s-10 2-10 2v30s5-2 10-2 8 2 8 2V20z' fill='%23e0e7ff'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css">
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Kindle EPUB Fixer",
-    "url": "https://kindle-epub-fixer.web.app/",
-    "description": "Corrija arquivos EPUB para o Kindle direto no navegador: analisa, corrige e reconstrói o pacote para aumentar a compatibilidade com o Send to Kindle. 100% local, sem upload.",
-    "applicationCategory": "UtilitiesApplication",
-    "operatingSystem": "Any (roda no navegador)",
-    "browserRequirements": "Requer JavaScript habilitado",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "inLanguage": ["en", "zh-CN", "hi", "es", "fr", "ar", "bn", "pt-BR", "ru", "ur", "id", "de", "nl", "ja", "tr", "ko", "vi", "it", "mr", "te", "ta"]
-  }
-  </script>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c3aed'/%3E%3Cstop offset='1' stop-color='%234f46e5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Cpath d='M14 20c0-3 3-5 8-5s10 2 10 2v30s-5-2-10-2-8 2-8 2V20z' fill='%23fff'/%3E%3Cpath d='M50 20c0-3-3-5-8-5s-10 2-10 2v30s5-2 10-2 8 2 8 2V20z' fill='%23e0e7ff'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Kindle EPUB Fixer",
+          "url": "https://kindle-epub-fixer.web.app/",
+          "description": "Corrija arquivos EPUB para o Kindle direto no navegador: analisa, corrige e reconstrói o pacote para aumentar a compatibilidade com o Send to Kindle. 100% local, sem upload.",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any (roda no navegador)",
+          "browserRequirements": "Requer JavaScript habilitado",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "inLanguage": ["en", "zh-CN", "hi", "es", "fr", "ar", "bn", "pt-BR", "ru", "ur", "id", "de", "nl", "ja", "tr", "ko", "vi", "it", "mr", "te", "ta"]
+        }
+    </script>
 </head>
 <body>
   <div class="background-orb orb-one"></div>

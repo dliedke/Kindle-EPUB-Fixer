@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://kindle-epub-fixer.web.app/sitemap.xml
