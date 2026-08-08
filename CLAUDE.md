@@ -12,7 +12,7 @@ Sem build step, sem npm, sem framework. JavaScript puro (IIFE, `"use strict"`), 
 
 Os arquivos da aplicação existem em duas cópias:
 
-- **Raiz** (`index.html`, `app.js`, `i18n.js`, `styles.css`, `sitemap.xml`, `robots.txt`, `vendor/`) — **fonte da verdade, edite aqui**.
+- **Raiz** (`index.html`, `app.js`, `i18n.js`, `styles.css`, `sitemap.txt`, `robots.txt`, `vendor/`) — **fonte da verdade, edite aqui**.
 - **`public/`** — espelho de deploy. `deploy.cmd` sobrescreve `public/` a partir da raiz antes de publicar. Qualquer edição feita diretamente em `public/` é perdida.
 
 Commits que sincronizam o espelho aparecem no histórico como `Sync public/ mirror with latest root changes`.
@@ -23,17 +23,16 @@ Commits que sincronizam o espelho aparecem no histórico como `Sync public/ mirr
 :: Rodar localmente — basta abrir o arquivo, funciona em file://
 start index.html
 
-:: Gerar sitemap.xml a partir de LANGUAGE_META (i18n.js)
-node tools\generate-sitemap.js
-
-:: Verificar se o sitemap esta atualizado, sem gravar (sai != 0 se divergir)
-node tools\generate-sitemap.js --check
-
-:: Gerar sitemap, copiar raiz -> public/ e publicar no Firebase Hosting
+:: Copiar raiz -> public/ e publicar no Firebase Hosting
 deploy.cmd
 ```
 
-O único uso de Node no projeto é o gerador de sitemap — a aplicação em si não depende dele.
+O `deploy.cmd` também apaga `sitemap.xml` da raiz e de `public/` (e aborta se sobrar
+algum), porque o sitemap publicado hoje é o `sitemap.txt`.
+
+O projeto não usa Node em nenhuma etapa obrigatória. `tools/generate-sitemap.js`
+continua no repositório, mas gera o antigo `sitemap.xml` multilíngue e **não é mais
+chamado pelo deploy** — está morto até que o sitemap XML volte a ser usado.
 
 Não há testes automatizados. Validação é manual — o roteiro mínimo depois de qualquer mudança em `app.js`:
 
@@ -108,13 +107,9 @@ Um idioma novo exige, além do bloco em `translations`:
 
 1. A entrada em `LANGUAGE_META` (`i18n.js`), na posição correta da ordem por número de falantes.
 2. **`index.html`** — uma linha `<link rel="alternate" hreflang="xx" href="…/?lang=xx">` e um `<meta property="og:locale:alternate">` correspondente. Ainda é manual.
-3. **`sitemap.xml`** — **não edite à mão**, é gerado:
-
-```cmd
-node tools\generate-sitemap.js
-```
-
-O `<lastmod>` usa a data de hoje; use `--lastmod=YYYY-MM-DD` para fixar. O `deploy.cmd` roda o gerador automaticamente antes de copiar para `public/`, e aborta o deploy se ele falhar.
+3. **Sitemap** — nada a fazer. O `sitemap.txt` publicado tem só a URL raiz
+   (`https://kindle-epub-fixer.web.app/`), sem uma entrada por idioma, e é ele que o
+   `robots.txt` aponta.
 
 Use o `hreflang` de `LANGUAGE_META.htmlLang` (ex.: `zh` → `zh-CN`, `pt` → `pt-BR`), mas o parâmetro da URL é sempre o código curto (`?lang=zh`, `?lang=pt`).
 
@@ -128,6 +123,7 @@ Use o `hreflang` de `LANGUAGE_META.htmlLang` (ex.: `zh` → `zh-CN`, `pt` → `p
 
 ## Fragilidades conhecidas
 
-- **`index.html` manual** — os `hreflang` e `og:locale:alternate` do `<head>` ainda são editados à mão. `tools/generate-sitemap.js` avisa quando um idioma de `LANGUAGE_META` não tem `hreflang` no `index.html`, mas não corrige.
+- **`index.html` manual** — os `hreflang` e `og:locale:alternate` do `<head>` ainda são editados à mão, sem nenhuma verificação de que todos os idiomas de `LANGUAGE_META` estão lá.
+- **`tools/generate-sitemap.js` órfão** — sobrou do fluxo antigo de `sitemap.xml` multilíngue; ninguém o chama e o `deploy.cmd` agora apaga o XML que ele produziria.
 - **Espelho `public/`** — só sincroniza via `deploy.cmd`; um commit que altera a raiz sem rodar o deploy deixa as duas cópias divergentes.
 - **Traduções faltando** — não há verificação de que uma chave existe nos 21 blocos; o fallback silencioso para o inglês esconde a omissão.
