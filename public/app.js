@@ -1899,6 +1899,11 @@
   // sumário (NAV/NCX) e reconstrói ambos listando cada capítulo, na ordem de leitura.
   // Resolve o caso em que o livro tem 1 entrada por "parte" e o Kindle trata a parte
   // inteira como um único capítulo.
+  //
+  // Além disso, escolhe dinamicamente a melhor ação para o conteúdo: quando um
+  // capítulo é gigantesco, insere âncoras nos espaçamentos internos (quebras de cena)
+  // e cria subentradas no sumário apontando para elas, para o Kindle tratar cada
+  // trecho como um capítulo navegável sem precisar dividir o arquivo.
   function expandNavigationFromChapters(context, navRecord, ncxRecord, spineRecords) {
     const { contentMap, title, language, bookIdentifier } = context;
 
@@ -1908,29 +1913,271 @@
       isChapterLikeDocument(contentMap.get(record.target)?.data));
     if (chapterRecords.length === 0) return;
 
-    const referenced = collectNavReferencedTargets(contentMap.get(navRecord.target)?.data, navRecord.target);
+    const navText = contentMap.get(navRecord.target)?.data;
+    const existingLabels = collectNavLabels(navText, navRecord.target);
+    const referenced = collectNavReferencedTargets(navText, navRecord.target);
     const missing = chapterRecords.filter((record) => !referenced.has(record.target.toLowerCase()));
-    if (missing.length === 0) return;
 
-    // Rótulos numéricos simples (1, 2, 3…) em vez da primeira frase de cada capítulo,
-    // que deixa o sumário poluído.
-    const numericLabel = (record, index) => String(index + 1);
+    // Primeiro passo: decide a divisão de cada capítulo (injeta âncoras nos que forem
+    // gigantescos) antes de rotular, para saber qual estratégia de rótulo usar.
+    const plans = chapterRecords.map((record) => ({ record, fragments: splitHugeChapter(record.target, contentMap) }));
+    const splitChapters = plans.filter((plan) => plan.fragments && plan.fragments.length > 1).length;
+
+    // Nada a fazer: nenhum capítulo ausente do sumário e nenhuma divisão de capítulo.
+    if (missing.length === 0 && splitChapters === 0) return;
+
+    // Rótulo-base de cada capítulo. Sem divisões, mantém o comportamento antigo: números
+    // sequenciais simples (1, 2, 3…), que deixam o sumário limpo. Havendo divisões,
+    // preserva os títulos de capítulo já existentes no sumário (e cai no número na falta).
+    const entries = [];
+    let splitParts = 0;
+    plans.forEach(({ record, fragments }, index) => {
+      const baseLabel = (splitChapters > 0 && existingLabels.get(record.target.toLowerCase())) || String(index + 1);
+      if (fragments && fragments.length > 1) {
+        splitParts += fragments.length;
+        fragments.forEach((fragment, part) => {
+          entries.push({
+            target: record.target,
+            fragment,
+            // Primeiro trecho mantém o rótulo do capítulo; os seguintes ganham " (n)".
+            label: part === 0 ? baseLabel : `${baseLabel} (${part + 1})`
+          });
+        });
+      } else {
+        entries.push({ target: record.target, fragment: null, label: baseLabel });
+      }
+    });
+
     contentMap.set(navRecord.target, {
-      data: generateNavXhtml(navRecord.target, title, language, chapterRecords, contentMap, numericLabel),
+      data: renderNavDocument(navRecord.target, title, language, entries),
       isText: true,
       sourcePath: navRecord.target
     });
     contentMap.set(ncxRecord.target, {
-      data: generateNcx(ncxRecord.target, title, bookIdentifier, chapterRecords, contentMap, numericLabel),
+      data: renderNcxDocument(ncxRecord.target, title, bookIdentifier, entries),
       isText: true,
       sourcePath: ncxRecord.target
     });
-    addIssue(
-      "fixed",
-      `Sumário reconstruído com ${chapterRecords.length} capítulos detectados no livro (${missing.length} estavam ausentes). Assim o Kindle passa a reconhecer cada capítulo.`,
-      navRecord.target,
-      "CHAPTERS_REBUILT"
-    );
+
+    if (splitChapters > 0) {
+      addIssue(
+        "fixed",
+        `Sumário reconstruído com ${chapterRecords.length} capítulos; ${splitChapters} capítulo(s) muito longo(s) foram divididos em ${splitParts} trechos pelos espaçamentos internos, para o Kindle navegar cada parte.`,
+        navRecord.target,
+        "CHAPTERS_SPLIT"
+      );
+    } else {
+      addIssue(
+        "fixed",
+        `Sumário reconstruído com ${chapterRecords.length} capítulos detectados no livro (${missing.length} estavam ausentes). Assim o Kindle passa a reconhecer cada capítulo.`,
+        navRecord.target,
+        "CHAPTERS_REBUILT"
+      );
+    }
+  }
+
+  // Limite (em caracteres de texto visível) a partir do qual um capítulo é
+  // considerado "gigantesco" e candidato a ser dividido pelos espaçamentos internos.
+  const HUGE_CHAPTER_MIN_CHARS = 15000;
+  // Tamanho mínimo de cada trecho ao agrupar cenas: evita gerar dezenas de trechos
+  // minúsculos, agrupando cenas consecutivas até passar deste tamanho.
+  const CHAPTER_SEGMENT_MIN_CHARS = 6000;
+  // Margem superior mínima (em em) para um parágrafo/elemento contar como quebra de cena.
+  const SCENE_BREAK_MIN_EM = 0.9;
+
+  // Divide um capítulo gigantesco em trechos usando os espaçamentos internos como
+  // pontos de corte. Não quebra o arquivo: apenas injeta âncoras (id) nos parágrafos
+  // de quebra de cena e devolve os fragmentos na ordem de leitura. O primeiro trecho
+  // é o topo do documento (fragmento nulo). Retorna null quando não há divisão a fazer.
+  function splitHugeChapter(target, contentMap) {
+    const item = contentMap.get(target);
+    if (!item?.isText) return null;
+
+    const documentNode = parseXml(item.data);
+    if (!documentNode) return null;
+
+    const body = findFirstByLocalName(documentNode, "body");
+    if (!body) return null;
+
+    const container = findContentContainer(body);
+    const blocks = getDirectChildren(container);
+    if (blocks.length < 3) return null;
+
+    // Só mexe em capítulos realmente grandes.
+    const totalChars = normalizeWhitespace(container.textContent || "").length;
+    if (totalChars < HUGE_CHAPTER_MIN_CHARS) return null;
+
+    const breakClasses = detectSceneBreakClasses(documentNode, target, contentMap, blocks);
+
+    // Comprimento de texto de cada bloco e o total, para não deixar um trecho final minúsculo.
+    const blockChars = blocks.map((block) => normalizeWhitespace(block.textContent || "").length);
+    const suffixChars = new Array(blocks.length + 1).fill(0);
+    for (let i = blocks.length - 1; i >= 0; i -= 1) suffixChars[i] = suffixChars[i + 1] + blockChars[i];
+
+    const existingIds = collectXmlIds(documentNode);
+    const fragments = [null]; // primeiro trecho = topo do documento
+    let acc = 0;
+    for (let i = 0; i < blocks.length; i += 1) {
+      const isBreak = i > 0 && isSceneBreakBlock(blocks[i], breakClasses);
+      // Corta aqui se já acumulamos o mínimo E ainda sobra conteúdo suficiente à frente.
+      if (isBreak && acc >= CHAPTER_SEGMENT_MIN_CHARS && suffixChars[i] >= CHAPTER_SEGMENT_MIN_CHARS) {
+        const block = blocks[i];
+        let id = (block.getAttribute("id") || "").trim();
+        if (!id) {
+          id = createUniqueId("kef-part", existingIds);
+          block.setAttribute("id", id);
+        }
+        fragments.push(id);
+        acc = 0;
+      }
+      acc += blockChars[i];
+    }
+
+    if (fragments.length < 2) return null;
+    item.data = serializeXmlDocument(documentNode);
+    return fragments;
+  }
+
+  // Encontra o container real do conteúdo, descendo por wrappers únicos (section/div/
+  // article/main) — muitos EPUBs embrulham o capítulo inteiro numa única <section>.
+  function findContentContainer(body) {
+    let container = body;
+    const wrappers = new Set(["section", "div", "article", "main"]);
+    while (true) {
+      const children = getDirectChildren(container);
+      if (children.length === 1 && wrappers.has((children[0].localName || "").toLowerCase())) {
+        container = children[0];
+      } else {
+        break;
+      }
+    }
+    return container;
+  }
+
+  // Descobre quais classes CSS representam quebras de cena (margem superior perceptível)
+  // e são raras no documento — parágrafos comuns nunca contam como quebra.
+  function detectSceneBreakClasses(documentNode, docPath, contentMap, blocks) {
+    const css = gatherDocumentCss(documentNode, docPath, contentMap);
+    const spacingClasses = parseSpacingClasses(css);
+    if (spacingClasses.size === 0) return new Set();
+
+    // Conta o uso de cada classe entre os blocos; uma quebra de cena é minoritária.
+    const usage = new Map();
+    for (const block of blocks) {
+      for (const cls of (block.getAttribute("class") || "").split(/\s+/)) {
+        if (cls) usage.set(cls, (usage.get(cls) || 0) + 1);
+      }
+    }
+    const limit = Math.max(1, Math.floor(blocks.length * 0.5));
+    const result = new Set();
+    for (const cls of spacingClasses) {
+      const count = usage.get(cls) || 0;
+      if (count >= 1 && count <= limit) result.add(cls);
+    }
+    return result;
+  }
+
+  // Junta o CSS relevante do documento: estilos embutidos (<style>) e folhas ligadas.
+  function gatherDocumentCss(documentNode, docPath, contentMap) {
+    let css = "";
+    for (const style of documentNode.getElementsByTagNameNS("*", "style")) {
+      css += `\n${style.textContent || ""}`;
+    }
+    for (const link of documentNode.getElementsByTagNameNS("*", "link")) {
+      const rel = (link.getAttribute("rel") || "").toLowerCase();
+      if (rel && !rel.includes("stylesheet")) continue;
+      const href = link.getAttribute("href");
+      if (!href || isExternalReference(href)) continue;
+      const cssPath = resolveExistingContentPath(docPath, href, contentMap);
+      const cssItem = cssPath && contentMap.get(cssPath);
+      if (cssItem?.isText) css += `\n${cssItem.data}`;
+    }
+    return css;
+  }
+
+  // Extrai do CSS as classes cujo seletor final tem margem superior >= SCENE_BREAK_MIN_EM.
+  function parseSpacingClasses(css) {
+    const classes = new Set();
+    if (!css) return classes;
+    const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    const ruleRegex = /([^{}]+)\{([^{}]*)\}/g;
+    let match;
+    while ((match = ruleRegex.exec(withoutComments)) !== null) {
+      const top = topMarginEm(match[2]);
+      if (top === null || top < SCENE_BREAK_MIN_EM) continue;
+      for (const selector of match[1].split(",")) {
+        const classMatch = selector.trim().match(/\.([A-Za-z0-9_-]+)\s*$/);
+        if (classMatch) classes.add(classMatch[1]);
+      }
+    }
+    return classes;
+  }
+
+  // Um bloco é quebra de cena se for <hr>, tiver classe de quebra, margem superior
+  // perceptível no style inline, ou for um separador tipográfico curto (***, ⁂…).
+  function isSceneBreakBlock(block, breakClasses) {
+    const tag = (block.localName || "").toLowerCase();
+    if (tag === "hr") return true;
+    for (const cls of (block.getAttribute("class") || "").split(/\s+/)) {
+      if (cls && breakClasses.has(cls)) return true;
+    }
+    const style = block.getAttribute("style");
+    if (style) {
+      const top = topMarginEm(style);
+      if (top !== null && top >= SCENE_BREAK_MIN_EM) return true;
+    }
+    const text = normalizeWhitespace(block.textContent || "");
+    if (text && text.length <= 12 && /^(?:[*⁂✱◆❖·•~]\s*){1,9}$/.test(text)) return true;
+    return false;
+  }
+
+  // Maior margem superior declarada num bloco de CSS, convertida para em (ou null).
+  function topMarginEm(declarations) {
+    let top = null;
+    const direct = declarations.match(/margin-top\s*:\s*([^;]+)/i);
+    if (direct) top = lengthToEm(direct[1]);
+    const shorthand = declarations.match(/margin\s*:\s*([^;]+)/i);
+    if (shorthand) {
+      const topPart = shorthand[1].trim().split(/\s+/)[0];
+      const value = lengthToEm(topPart);
+      if (value !== null) top = top === null ? value : Math.max(top, value);
+    }
+    return top;
+  }
+
+  // Converte um comprimento CSS para em de forma aproximada (suficiente para heurística).
+  function lengthToEm(value) {
+    const match = String(value).trim().match(/^(-?\d*\.?\d+)\s*(em|rem|px|pt|%)?$/i);
+    if (!match) return null;
+    const number = parseFloat(match[1]);
+    if (!Number.isFinite(number)) return null;
+    switch ((match[2] || "em").toLowerCase()) {
+      case "em":
+      case "rem": return number;
+      case "px": return number / 16;
+      case "pt": return number / 12;
+      case "%": return number / 100;
+      default: return number;
+    }
+  }
+
+  // Rótulos (em minúsculas) por caminho de destino já presentes nos links do NAV,
+  // para preservar títulos de capítulo existentes ao reconstruir o sumário.
+  function collectNavLabels(navText, navPath) {
+    const result = new Map();
+    if (typeof navText !== "string" || !navText) return result;
+    const documentNode = parseXml(navText);
+    if (!documentNode) return result;
+    for (const anchor of documentNode.getElementsByTagNameNS("*", "a")) {
+      const href = anchor.getAttribute("href");
+      if (!href || isExternalReference(href)) continue;
+      const { pathPart } = splitReference(decodeXmlAttribute(href));
+      if (!pathPart) continue;
+      const key = normalizePackagePath(joinPath(dirname(navPath), pathPart)).toLowerCase();
+      const label = normalizeWhitespace(anchor.textContent || "");
+      if (label && !result.has(key)) result.set(key, label);
+    }
+    return result;
   }
 
   // Conjunto de caminhos de conteúdo (em minúsculas) já referenciados pelos links do NAV.
@@ -2022,12 +2269,37 @@
   }
 
   function generateNavXhtml(navPath, title, language, spineRecords, contentMap, labelForRecord) {
-    const links = spineRecords.map((record, index) => {
-      const label = labelForRecord
+    return renderNavDocument(navPath, title, language, spineRecordsToEntries(spineRecords, contentMap, labelForRecord));
+  }
+
+  function generateNcx(ncxPath, title, identifier, spineRecords, contentMap, labelForRecord) {
+    return renderNcxDocument(ncxPath, title, identifier, spineRecordsToEntries(spineRecords, contentMap, labelForRecord));
+  }
+
+  // Converte registros do spine em entradas de sumário {target, fragment, label}.
+  // O fragmento fica nulo aqui — cada documento vira uma entrada inteira.
+  function spineRecordsToEntries(spineRecords, contentMap, labelForRecord) {
+    return spineRecords.map((record, index) => ({
+      target: record.target,
+      fragment: null,
+      label: labelForRecord
         ? labelForRecord(record, index)
-        : extractDocumentTitle(contentMap.get(record.target)?.data, record.target, index + 1);
-      const href = relativePath(dirname(navPath), record.target);
-      return `      <li><a href="${escapeXml(href)}">${escapeXml(label)}</a></li>`;
+        : extractDocumentTitle(contentMap.get(record.target)?.data, record.target, index + 1)
+    }));
+  }
+
+  // Monta o href de uma entrada, anexando a âncora interna quando houver.
+  function navEntryHref(fromDirectory, entry) {
+    const href = relativePath(fromDirectory, entry.target);
+    return entry.fragment ? `${href}#${entry.fragment}` : href;
+  }
+
+  // Gera o NAV (EPUB 3) a partir de entradas de sumário; cada entrada aponta para um
+  // documento inteiro ou para uma âncora interna (documento#fragmento).
+  function renderNavDocument(navPath, title, language, entries) {
+    const links = entries.map((entry) => {
+      const href = navEntryHref(dirname(navPath), entry);
+      return `      <li><a href="${escapeXml(href)}">${escapeXml(entry.label)}</a></li>`;
     }).join("\n");
 
     const tocLabel = bookText(language, "toc");
@@ -2036,13 +2308,11 @@
     return `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE html>\n<html xmlns="${XMLNS_XHTML}" xmlns:epub="http://www.idpf.org/2007/ops" lang="${escapeXml(language || "und")}" xml:lang="${escapeXml(language || "und")}">\n<head>\n  <meta charset="UTF-8"/>\n  <title>${escapeXml(tocLabel)} — ${escapeXml(title || genericBook)}</title>\n</head>\n<body>\n  <nav epub:type="toc" id="toc">\n    <h1>${escapeXml(tocLabel)}</h1>\n    <ol>\n${links || `      <li>${escapeXml(contentLabel)}</li>`}\n    </ol>\n  </nav>\n</body>\n</html>\n`;
   }
 
-  function generateNcx(ncxPath, title, identifier, spineRecords, contentMap, labelForRecord) {
-    const navPoints = spineRecords.map((record, index) => {
-      const label = labelForRecord
-        ? labelForRecord(record, index)
-        : extractDocumentTitle(contentMap.get(record.target)?.data, record.target, index + 1);
-      const src = relativePath(dirname(ncxPath), record.target);
-      return `    <navPoint id="navPoint-${index + 1}" playOrder="${index + 1}">\n      <navLabel><text>${escapeXml(label)}</text></navLabel>\n      <content src="${escapeXml(src)}"/>\n    </navPoint>`;
+  // Gera o NCX legado a partir das mesmas entradas de sumário.
+  function renderNcxDocument(ncxPath, title, identifier, entries) {
+    const navPoints = entries.map((entry, index) => {
+      const src = navEntryHref(dirname(ncxPath), entry);
+      return `    <navPoint id="navPoint-${index + 1}" playOrder="${index + 1}">\n      <navLabel><text>${escapeXml(entry.label)}</text></navLabel>\n      <content src="${escapeXml(src)}"/>\n    </navPoint>`;
     }).join("\n");
 
     return `<?xml version="1.0" encoding="UTF-8"?>\n<ncx xmlns="${XMLNS_NCX}" version="2005-1">\n  <head>\n    <meta name="dtb:uid" content="${escapeXml(identifier || `urn:uuid:${createUuid()}`)}"/>\n    <meta name="dtb:depth" content="1"/>\n    <meta name="dtb:totalPageCount" content="0"/>\n    <meta name="dtb:maxPageNumber" content="0"/>\n  </head>\n  <docTitle><text>${escapeXml(title || bookText("und", "generic"))}</text></docTitle>\n  <navMap>\n${navPoints}\n  </navMap>\n</ncx>\n`;

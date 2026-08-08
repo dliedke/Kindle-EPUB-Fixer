@@ -1978,10 +1978,10 @@
 
   // Limite (em caracteres de texto visível) a partir do qual um capítulo é
   // considerado "gigantesco" e candidato a ser dividido pelos espaçamentos internos.
-  const HUGE_CHAPTER_MIN_CHARS = 30000;
+  const HUGE_CHAPTER_MIN_CHARS = 15000;
   // Tamanho mínimo de cada trecho ao agrupar cenas: evita gerar dezenas de trechos
   // minúsculos, agrupando cenas consecutivas até passar deste tamanho.
-  const CHAPTER_SEGMENT_MIN_CHARS = 12000;
+  const CHAPTER_SEGMENT_MIN_CHARS = 6000;
   // Margem superior mínima (em em) para um parágrafo/elemento contar como quebra de cena.
   const SCENE_BREAK_MIN_EM = 0.9;
 
