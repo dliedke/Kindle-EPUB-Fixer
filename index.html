@@ -1,22 +1,31 @@
 <!doctype html>
-<html lang="pt-BR">
+<!--
+  O HTML servido fica no idioma padrao do i18n (en, ver DEFAULT_LANGUAGE em
+  i18n.js). O Googlebot renderiza a pagina com Accept-Language en e o app troca
+  todo o texto por JS; servir o fallback em outro idioma fazia o HTML bruto e o
+  HTML renderizado divergirem (lang, title e description), o que atrapalha a
+  indexacao. Nao adicione <link rel="alternate" hreflang>: as variantes ?lang=xx
+  servem exatamente este mesmo HTML e apontam o canonical para a raiz, entao um
+  hreflang aqui viraria "hreflang para pagina nao canonica" no Search Console.
+-->
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
     <meta name="theme-color" content="#111827">
-    <title>Kindle EPUB Fix</title>
-    <meta name="description" content="Corrija arquivos EPUB para o Kindle direto no navegador: analisa, corrige e reconstrói o pacote para aumentar a compatibilidade com o Send to Kindle. 100% local, sem upload.">
+    <title>Kindle EPUB Fix — Repair EPUB files for Send to Kindle</title>
+    <meta name="description" content="Analyzes, repairs, and rebuilds EPUB files to improve compatibility with Send to Kindle.">
     <link rel="canonical" href="https://kindle-epub-fix.web.app/">
     <meta name="robots" content="index, follow">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Kindle EPUB Fix">
-    <meta property="og:title" content="Kindle EPUB Fix">
-    <meta property="og:description" content="Corrija arquivos EPUB para o Kindle direto no navegador: analisa, corrige e reconstrói o pacote para aumentar a compatibilidade com o Send to Kindle. 100% local, sem upload.">
+    <meta property="og:title" content="Kindle EPUB Fix — Repair EPUB files for Send to Kindle">
+    <meta property="og:description" content="Analyzes, repairs, and rebuilds EPUB files to improve compatibility with Send to Kindle.">
     <meta property="og:url" content="https://kindle-epub-fix.web.app/">
-    <meta property="og:locale" content="pt_BR">
-    <meta property="og:locale:alternate" content="en_US">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:locale:alternate" content="pt_BR">
     <meta property="og:locale:alternate" content="zh_CN">
     <meta property="og:locale:alternate" content="hi_IN">
     <meta property="og:locale:alternate" content="es_ES">
@@ -37,8 +46,8 @@
     <meta property="og:locale:alternate" content="te_IN">
     <meta property="og:locale:alternate" content="ta_IN">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Kindle EPUB Fix">
-    <meta name="twitter:description" content="Corrija arquivos EPUB para o Kindle direto no navegador: analisa, corrige e reconstrói o pacote para aumentar a compatibilidade com o Send to Kindle. 100% local, sem upload.">
+    <meta name="twitter:title" content="Kindle EPUB Fix — Repair EPUB files for Send to Kindle">
+    <meta name="twitter:description" content="Analyzes, repairs, and rebuilds EPUB files to improve compatibility with Send to Kindle.">
 
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c3aed'/%3E%3Cstop offset='1' stop-color='%234f46e5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Cpath d='M14 20c0-3 3-5 8-5s10 2 10 2v30s-5-2-10-2-8 2-8 2V20z' fill='%23fff'/%3E%3Cpath d='M50 20c0-3-3-5-8-5s-10 2-10 2v30s5-2 10-2 8 2 8 2V20z' fill='%23e0e7ff'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
@@ -48,10 +57,10 @@
           "@type": "WebApplication",
           "name": "Kindle EPUB Fix",
           "url": "https://kindle-epub-fix.web.app/",
-          "description": "Corrija arquivos EPUB para o Kindle direto no navegador: analisa, corrige e reconstrói o pacote para aumentar a compatibilidade com o Send to Kindle. 100% local, sem upload.",
+          "description": "Analyzes, repairs, and rebuilds EPUB files to improve compatibility with Send to Kindle. Runs entirely in the browser, with no upload.",
           "applicationCategory": "UtilitiesApplication",
-          "operatingSystem": "Any (roda no navegador)",
-          "browserRequirements": "Requer JavaScript habilitado",
+          "operatingSystem": "Any (runs in the browser)",
+          "browserRequirements": "Requires JavaScript",
           "offers": {
             "@type": "Offer",
             "price": "0",
@@ -68,39 +77,81 @@
   <main class="app-shell">
     <header class="hero">
       <div>
-        <p class="eyebrow" data-i18n="hero.eyebrow">100% local · nenhum upload</p>
+        <p class="eyebrow" data-i18n="hero.eyebrow">100% local · no uploads</p>
         <h1>Kindle EPUB Fix</h1>
-        <p class="hero-copy" data-i18n="hero.copy">Analisa, corrige e reconstrói arquivos EPUB para aumentar a compatibilidade com o Send to Kindle.</p>
+        <p class="hero-copy" data-i18n="hero.copy">Analyzes, repairs, and rebuilds EPUB files to improve compatibility with Send to Kindle.</p>
       </div>
       <div class="header-actions">
         <label class="language-control" for="languageSelect">
           <span aria-hidden="true">🌐</span>
-          <span class="sr-only" data-i18n="language.label">Idioma</span>
+          <span class="sr-only" data-i18n="language.label">Language</span>
           <select id="languageSelect" data-i18n-aria-label="language.label">
             <!-- As opções são preenchidas dinamicamente por app.js a partir de EpubFixerI18n.getLanguages() -->
             <option value="en">English</option>
             <option value="pt">Português</option>
           </select>
         </label>
-        <div class="privacy-badge" data-i18n-title="privacy.title" title="O arquivo é processado somente no seu navegador.">
+        <div class="privacy-badge" data-i18n-title="privacy.title" title="The file is processed only in your browser.">
           <span aria-hidden="true">🔒</span>
-          <span data-i18n="privacy.label">Processamento local</span>
+          <span data-i18n="privacy.label">Local processing</span>
         </div>
       </div>
     </header>
+
+    <!-- Este painel e o conteudo indexavel do site: ele NASCE aberto (atributo open) para
+         que o Googlebot, que nao tem localStorage, sempre renderize o texto expandido.
+         O app.js so fecha depois, se o usuario tiver salvo essa preferencia. -->
+    <details id="introPanel" class="panel collapsible-panel intro-panel" aria-labelledby="intro-title" open>
+      <summary>
+        <div>
+          <p class="section-kicker" data-i18n="intro.kicker">Free EPUB repair for Kindle</p>
+          <h2 id="intro-title" data-i18n="intro.title">What Kindle EPUB Fix does</h2>
+        </div>
+      </summary>
+      <div class="collapsible-body">
+        <p class="intro-lead" data-i18n="intro.lead">Send to Kindle rejects EPUB files without ever saying why. The cause is almost always structural: a mimetype stored in the wrong place, a broken OPF manifest, internal links pointing to files that no longer exist, or a table of contents Kindle cannot read. Kindle EPUB Fix opens the book, lists every problem it finds, and rebuilds the package so Amazon accepts it.</p>
+        <p class="intro-lead" data-i18n="intro.privacy">Your book never leaves your computer. There is no server, no upload, and no account: the entire repair runs inside this browser tab, and the corrected EPUB is saved straight back to your device. It is free and works with any EPUB, including books exported from another app.</p>
+        <div class="intro-grid">
+          <article>
+            <strong data-i18n="intro.diagnose.title">Full diagnosis before anything changes</strong>
+            <p data-i18n="intro.diagnose.description">Every issue is listed with its severity and the file it came from, plus a compatibility score from 0 to 100. You see exactly what was wrong and what was repaired.</p>
+          </article>
+          <article>
+            <strong data-i18n="intro.package.title">Package and structure repair</strong>
+            <p data-i18n="intro.package.description">Rebuilds the ZIP with the mimetype first and uncompressed, fixes the OPF manifest and spine, restores missing IDs and media types, normalizes file paths, and removes junk left behind by macOS, Windows, and editing tools.</p>
+          </article>
+          <article>
+            <strong data-i18n="intro.toc.title">Rebuilt table of contents</strong>
+            <p data-i18n="intro.toc.description">Finds chapters that exist in the book but are missing from the table of contents, regenerates the NAV and NCX navigation, and splits very long chapters into navigable parts using the book's own scene breaks.</p>
+          </article>
+          <article>
+            <strong data-i18n="intro.margins.title">Adjustable margins with live preview</strong>
+            <p data-i18n="intro.margins.description">Shrink or nearly eliminate the side margins to fit more text on an e-ink screen. The built-in preview renders real chapters, so you can compare against the original before repairing anything.</p>
+          </article>
+          <article>
+            <strong data-i18n="intro.batch.title">Batch mode for several books</strong>
+            <p data-i18n="intro.batch.description">Queue as many EPUB files as you need. Each file keeps its own repair options, and the whole queue can be downloaded as a single ZIP when it finishes.</p>
+          </article>
+          <article>
+            <strong data-i18n="intro.report.title">Detailed downloadable report</strong>
+            <p data-i18n="intro.report.description">Save the complete diagnosis as a JSON file in the language you selected, as a record of what changed in each book. Covers, DRM, and remote resources are all reported.</p>
+          </article>
+        </div>
+      </div>
+    </details>
 
     <section class="panel upload-panel" aria-labelledby="upload-title">
       <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-describedby="drop-help">
         <input id="fileInput" type="file" accept=".epub,application/epub+zip" multiple hidden>
         <div class="drop-icon" aria-hidden="true">↥</div>
-        <h2 id="upload-title" data-i18n="upload.title">Solte o EPUB aqui</h2>
-        <p id="drop-help" data-i18n="upload.help">ou clique para escolher um ou mais arquivos</p>
-        <span class="file-limit" data-i18n="upload.limit">Recomendado: até 500 MB por arquivo</span>
+        <h2 id="upload-title" data-i18n="upload.title">Drop the EPUB here</h2>
+        <p id="drop-help" data-i18n="upload.help">or click to choose one or more files</p>
+        <span class="file-limit" data-i18n="upload.limit">Recommended: up to 500 MB per file</span>
       </div>
 
       <div id="batchSummary" class="batch-summary hidden" aria-live="polite">
         <span id="batchSummaryText"></span>
-        <button id="downloadAllButton" class="text-button hidden" type="button" data-i18n="button.downloadAll">Baixar todos (.zip)</button>
+        <button id="downloadAllButton" class="text-button hidden" type="button" data-i18n="button.downloadAll">Download all (.zip)</button>
       </div>
 
       <div id="fileList" class="file-list hidden" aria-live="polite"></div>
@@ -109,31 +160,31 @@
     <section class="panel action-panel">
       <div id="idleState" class="state-card">
         <div class="state-icon" aria-hidden="true">✓</div>
-        <h3 data-i18n="idle.title">Pronto para começar</h3>
-        <p data-i18n="idle.description">Selecione um EPUB. O diagnóstico mostrará o que foi encontrado e o que pôde ser corrigido.</p>
+        <h3 data-i18n="idle.title">Ready to begin</h3>
+        <p data-i18n="idle.description">Select an EPUB. The diagnostics will show what was found and what could be repaired.</p>
       </div>
 
       <div id="progressState" class="progress-state hidden" aria-live="polite">
         <div class="progress-header">
-          <strong id="progressLabel" data-i18n="progress.initialLabel">Lendo arquivo…</strong>
+          <strong id="progressLabel" data-i18n="progress.initialLabel">Reading file…</strong>
           <span id="progressPercent">0%</span>
         </div>
         <div class="progress-track" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div>
-        <p id="progressDetail" data-i18n="progress.initialDetail">Preparando análise.</p>
+        <p id="progressDetail" data-i18n="progress.initialDetail">Preparing analysis.</p>
       </div>
 
       <div id="resultState" class="result-state hidden" aria-live="polite">
         <div class="summary-grid">
-          <div class="summary-card"><span id="errorCount">0</span><small data-i18n="summary.errors">erros</small></div>
-          <div class="summary-card"><span id="warningCount">0</span><small data-i18n="summary.warnings">alertas</small></div>
-          <div class="summary-card"><span id="fixedCount">0</span><small data-i18n="summary.fixes">correções</small></div>
-          <div class="summary-card"><span id="fileCount">0</span><small data-i18n="summary.files">arquivos</small></div>
+          <div class="summary-card"><span id="errorCount">0</span><small data-i18n="summary.errors">errors</small></div>
+          <div class="summary-card"><span id="warningCount">0</span><small data-i18n="summary.warnings">warnings</small></div>
+          <div class="summary-card"><span id="fixedCount">0</span><small data-i18n="summary.fixes">fixes</small></div>
+          <div class="summary-card"><span id="fileCount">0</span><small data-i18n="summary.files">files</small></div>
         </div>
 
         <div id="scoreCard" class="score-card hidden">
           <div class="score-ring"><span id="scoreValue">0</span><small>/100</small></div>
           <div class="score-copy">
-            <strong data-i18n="score.title">Nota de compatibilidade</strong>
+            <strong data-i18n="score.title">Compatibility score</strong>
             <span id="scoreTier"></span>
           </div>
         </div>
@@ -144,20 +195,20 @@
         </div>
 
         <div class="filename-field hidden" id="filenameField">
-          <label for="outputFilenameInput" data-i18n="result.filenameLabel">Nome do arquivo ao salvar</label>
+          <label for="outputFilenameInput" data-i18n="result.filenameLabel">File name when saving</label>
           <input id="outputFilenameInput" class="filename-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off">
         </div>
 
         <details id="reportDetails" class="report-details">
-          <summary data-i18n="report.viewDetails">Ver relatório detalhado</summary>
+          <summary data-i18n="report.viewDetails">View detailed report</summary>
           <div class="report-toolbar">
-            <div class="filter-group" role="group" data-i18n-aria-label="report.filterLabel" aria-label="Filtrar relatório">
-              <button class="filter-button active" data-filter="all" type="button" data-i18n="report.all">Todos</button>
-              <button class="filter-button" data-filter="error" type="button" data-i18n="report.errors">Erros</button>
-              <button class="filter-button" data-filter="warning" type="button" data-i18n="report.warnings">Alertas</button>
-              <button class="filter-button" data-filter="fixed" type="button" data-i18n="report.fixed">Corrigidos</button>
+            <div class="filter-group" role="group" data-i18n-aria-label="report.filterLabel" aria-label="Filter report">
+              <button class="filter-button active" data-filter="all" type="button" data-i18n="report.all">All</button>
+              <button class="filter-button" data-filter="error" type="button" data-i18n="report.errors">Errors</button>
+              <button class="filter-button" data-filter="warning" type="button" data-i18n="report.warnings">Warnings</button>
+              <button class="filter-button" data-filter="fixed" type="button" data-i18n="report.fixed">Fixed</button>
             </div>
-            <button id="downloadReportButton" class="text-button" type="button" data-i18n="report.download">Baixar relatório</button>
+            <button id="downloadReportButton" class="text-button" type="button" data-i18n="report.download">Download report</button>
           </div>
 
           <div id="reportList" class="report-list"></div>
@@ -167,117 +218,117 @@
       <div class="action-buttons">
         <button id="repairButton" class="primary-button" type="button" disabled>
           <span aria-hidden="true">⚙</span>
-          <span data-i18n="button.repair">Analisar e corrigir EPUB</span>
+          <span data-i18n="button.repair">Analyze and repair EPUB</span>
         </button>
         <button id="previewButton" class="secondary-button hidden" type="button">
           <span aria-hidden="true">👁</span>
-          <span data-i18n="button.preview">Ver prévia das margens</span>
+          <span data-i18n="button.preview">Preview margins</span>
         </button>
         <button id="downloadButton" class="secondary-button hidden" type="button">
           <span aria-hidden="true">↓</span>
-          <span data-i18n="button.download">Baixar EPUB corrigido</span>
+          <span data-i18n="button.download">Download repaired EPUB</span>
         </button>
         <a id="sendToKindleLink" class="secondary-button hidden" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener noreferrer">
           <span aria-hidden="true">↗</span>
-          <span data-i18n="button.sendToKindle">Abrir Send to Kindle</span>
+          <span data-i18n="button.sendToKindle">Open Send to Kindle</span>
         </a>
       </div>
 
       <p id="supportLink" class="support-note hidden">
-        <span data-i18n="result.supportText">Gostou da ferramenta?</span>
-        <a href="https://www.buymeacoffee.com/dliedke" target="_blank" rel="noopener noreferrer">☕ <span data-i18n="result.supportLinkText">Compre um café para o desenvolvedor</span></a>
+        <span data-i18n="result.supportText">Enjoying the tool?</span>
+        <a href="https://www.buymeacoffee.com/dliedke" target="_blank" rel="noopener noreferrer">☕ <span data-i18n="result.supportLinkText">Buy the developer a coffee</span></a>
       </p>
     </section>
 
     <details id="settingsPanel" class="panel collapsible-panel settings-panel" aria-labelledby="settings-title">
       <summary>
         <div>
-          <p class="section-kicker" data-i18n="settings.kicker">Configuração</p>
-          <h2 id="settings-title" data-i18n="settings.title">Correções</h2>
+          <p class="section-kicker" data-i18n="settings.kicker">Configuration</p>
+          <h2 id="settings-title" data-i18n="settings.title">Repairs</h2>
         </div>
-        <small class="collapsible-hint" data-i18n="settings.hint">Os padrões recomendados já estão ativos</small>
+        <small class="collapsible-hint" data-i18n="settings.hint">Recommended defaults are already on</small>
       </summary>
 
       <div class="collapsible-body">
         <div class="collapsible-body-header">
           <p id="settingsScope" class="settings-scope hidden"></p>
           <div class="collapsible-body-actions">
-            <button id="applyOptionsToAllButton" class="text-button hidden" type="button" data-i18n="settings.applyToAll">Aplicar a todos os arquivos</button>
-            <button id="recommendedButton" class="text-button" type="button" data-i18n="settings.recommended">Usar recomendadas</button>
+            <button id="applyOptionsToAllButton" class="text-button hidden" type="button" data-i18n="settings.applyToAll">Apply to all files</button>
+            <button id="recommendedButton" class="text-button" type="button" data-i18n="settings.recommended">Use recommended</button>
           </div>
         </div>
 
         <fieldset>
-          <legend data-i18n="settings.structure">Estrutura do EPUB</legend>
+          <legend data-i18n="settings.structure">EPUB structure</legend>
           <label class="switch-row">
-            <span><strong data-i18n="option.reduceMargins.title">Diminuir margens laterais</strong><small data-i18n="option.reduceMargins.description">Reduz o espaço em branco nas laterais do texto para aproveitar melhor a tela.</small></span>
+            <span><strong data-i18n="option.reduceMargins.title">Reduce side margins</strong><small data-i18n="option.reduceMargins.description">Shrinks the blank space on the sides of the text to make better use of the screen.</small></span>
             <input id="reduceMargins" type="checkbox">
             <span class="switch" aria-hidden="true"></span>
           </label>
           <label class="switch-row">
-            <span><strong data-i18n="option.miniMargins.title">Mini-margens (quase sem espaço lateral)</strong><small data-i18n="option.miniMargins.description">Reduz ainda mais, deixando o texto quase colado nas bordas da tela. Tem prioridade sobre a opção acima.</small></span>
+            <span><strong data-i18n="option.miniMargins.title">Mini margins (almost edge-to-edge)</strong><small data-i18n="option.miniMargins.description">Shrinks it even further, so text sits almost flush against the screen edges. Turning this on disables the option above.</small></span>
             <input id="miniMargins" type="checkbox">
             <span class="switch" aria-hidden="true"></span>
           </label>
           <label class="switch-row">
-            <span><strong data-i18n="option.rebuildChapters.title">Reconstruir capítulos no sumário</strong><small data-i18n="option.rebuildChapters.description">Detecta capítulos que existem no livro mas faltam no sumário e os adiciona, para o Kindle reconhecer cada um. Substitui o sumário atual. Também divide capítulos muito longos em partes menores usando os espaçamentos internos, para o Kindle navegar cada trecho.</small></span>
+            <span><strong data-i18n="option.rebuildChapters.title">Rebuild chapters in the table of contents</strong><small data-i18n="option.rebuildChapters.description">Detects chapters that exist in the book but are missing from the table of contents and adds them, so Kindle recognizes each one. Replaces the current table of contents. It also splits very long chapters into smaller parts using their internal spacing, so Kindle can navigate each part.</small></span>
             <input id="rebuildChapters" type="checkbox">
             <span class="switch" aria-hidden="true"></span>
           </label>
           <label class="switch-row">
-            <span><strong data-i18n="option.fixZip.title">Reconstruir pacote ZIP</strong><small data-i18n="option.fixZip.description">Coloca o mimetype primeiro e sem compressão.</small></span>
+            <span><strong data-i18n="option.fixZip.title">Rebuild ZIP package</strong><small data-i18n="option.fixZip.description">Places mimetype first and stores it without compression.</small></span>
             <input id="fixZip" type="checkbox" checked disabled>
             <span class="switch" aria-hidden="true"></span>
           </label>
           <label class="switch-row">
-            <span><strong data-i18n="option.normalizePaths.title">Normalizar nomes e caminhos</strong><small data-i18n="option.normalizePaths.description">Corrige espaços, acentos problemáticos, porcentagens, barras e caixa.</small></span>
+            <span><strong data-i18n="option.normalizePaths.title">Normalize names and paths</strong><small data-i18n="option.normalizePaths.description">Fixes spaces, problematic accents, percent encoding, slashes, and letter case.</small></span>
             <input id="normalizePaths" type="checkbox" checked>
             <span class="switch" aria-hidden="true"></span>
           </label>
           <label class="switch-row">
-            <span><strong data-i18n="option.removeJunk.title">Remover arquivos inúteis</strong><small data-i18n="option.removeJunk.description">Exclui lixo de macOS, Windows e editores.</small></span>
+            <span><strong data-i18n="option.removeJunk.title">Remove junk files</strong><small data-i18n="option.removeJunk.description">Deletes files left by macOS, Windows, and editors.</small></span>
             <input id="removeJunk" type="checkbox" checked>
             <span class="switch" aria-hidden="true"></span>
           </label>
         </fieldset>
 
         <fieldset>
-          <legend data-i18n="settings.content">Pacote e conteúdo</legend>
+          <legend data-i18n="settings.content">Package and content</legend>
           <label class="switch-row">
-            <span><strong data-i18n="option.repairPackage.title">Reparar OPF, manifesto e spine</strong><small data-i18n="option.repairPackage.description">Corrige IDs, itens ausentes, media types e ordem de leitura.</small></span>
+            <span><strong data-i18n="option.repairPackage.title">Repair OPF, manifest, and spine</strong><small data-i18n="option.repairPackage.description">Fixes IDs, missing items, media types, and reading order.</small></span>
             <input id="repairPackage" type="checkbox" checked>
             <span class="switch" aria-hidden="true"></span>
           </label>
           <label class="switch-row">
-            <span><strong data-i18n="option.repairNavigation.title">Reparar sumários NAV e NCX</strong><small data-i18n="option.repairNavigation.description">Gera navegação compatível quando estiver ausente ou vazia.</small></span>
+            <span><strong data-i18n="option.repairNavigation.title">Repair NAV and NCX tables of contents</strong><small data-i18n="option.repairNavigation.description">Creates compatible navigation when it is missing or empty.</small></span>
             <input id="repairNavigation" type="checkbox" checked>
             <span class="switch" aria-hidden="true"></span>
           </label>
           <label class="switch-row">
-            <span><strong data-i18n="option.repairText.title">Corrigir XHTML, XML e CSS</strong><small data-i18n="option.repairText.description">Remove caracteres inválidos, BOMs e referências quebradas.</small></span>
+            <span><strong data-i18n="option.repairText.title">Repair XHTML, XML, and CSS</strong><small data-i18n="option.repairText.description">Removes invalid characters, BOMs, and broken references.</small></span>
             <input id="repairText" type="checkbox" checked>
             <span class="switch" aria-hidden="true"></span>
           </label>
           <label class="switch-row">
-            <span><strong data-i18n="option.repairCover.title">Detectar e configurar capa</strong><small data-i18n="option.repairCover.description">Corrige a propriedade cover-image e o metadado legado.</small></span>
+            <span><strong data-i18n="option.repairCover.title">Detect and configure cover</strong><small data-i18n="option.repairCover.description">Fixes the cover-image property and legacy cover metadata.</small></span>
             <input id="repairCover" type="checkbox" checked>
             <span class="switch" aria-hidden="true"></span>
           </label>
         </fieldset>
 
         <details class="advanced-options">
-          <summary data-i18n="advanced.title">Opções avançadas</summary>
+          <summary data-i18n="advanced.title">Advanced options</summary>
           <label class="check-row">
             <input id="addUnlisted" type="checkbox" checked>
-            <span><strong data-i18n="option.addUnlisted.title">Adicionar arquivos não listados ao manifesto</strong><small data-i18n="option.addUnlisted.description">Inclui XHTML, CSS, imagens e fontes encontrados no pacote.</small></span>
+            <span><strong data-i18n="option.addUnlisted.title">Add unlisted files to the manifest</strong><small data-i18n="option.addUnlisted.description">Includes XHTML, CSS, images, and fonts found in the package.</small></span>
           </label>
           <label class="check-row">
             <input id="removeMissing" type="checkbox" checked>
-            <span><strong data-i18n="option.removeMissing.title">Remover referências sem arquivo</strong><small data-i18n="option.removeMissing.description">Evita falha por itens do manifesto que não existem.</small></span>
+            <span><strong data-i18n="option.removeMissing.title">Remove references to missing files</strong><small data-i18n="option.removeMissing.description">Prevents failures caused by manifest items that do not exist.</small></span>
           </label>
           <label class="check-row">
             <input id="stripScripts" type="checkbox">
-            <span><strong data-i18n="option.stripScripts.title">Remover JavaScript do livro</strong><small data-i18n="option.stripScripts.description">Pode ajudar em EPUBs interativos rejeitados pelo Kindle.</small></span>
+            <span><strong data-i18n="option.stripScripts.title">Remove JavaScript from the book</strong><small data-i18n="option.stripScripts.description">May help with interactive EPUBs rejected by Kindle.</small></span>
           </label>
         </details>
       </div>
@@ -286,43 +337,43 @@
     <details class="panel collapsible-panel notes-panel">
       <summary>
         <div>
-          <h2 data-i18n="notes.title">O que esta ferramenta verifica</h2>
+          <h2 data-i18n="notes.title">What this tool checks</h2>
         </div>
       </summary>
       <div class="collapsible-body">
         <div class="notes-grid">
-          <article><strong data-i18n="notes.zip.title">ZIP e mimetype</strong><p data-i18n="notes.zip.description">Ordem, compressão, assinatura do pacote e arquivos duplicados.</p></article>
-          <article><strong data-i18n="notes.opf.title">Container e OPF</strong><p data-i18n="notes.opf.description">Rootfile, metadados, manifesto, spine, IDs e tipos MIME.</p></article>
-          <article><strong data-i18n="notes.links.title">Links internos</strong><p data-i18n="notes.links.description">Referências relativas, URLs codificadas, diferenças de caixa e arquivos renomeados.</p></article>
-          <article><strong data-i18n="notes.kindle.title">Conteúdo Kindle</strong><p data-i18n="notes.kindle.description">Capa, NAV, NCX, XHTML, XML, CSS, imagens, fontes e arquivos indesejados.</p></article>
+          <article><strong data-i18n="notes.zip.title">ZIP and mimetype</strong><p data-i18n="notes.zip.description">Package order, compression, signature, and duplicate files.</p></article>
+          <article><strong data-i18n="notes.opf.title">Container and OPF</strong><p data-i18n="notes.opf.description">Rootfile, metadata, manifest, spine, IDs, and MIME types.</p></article>
+          <article><strong data-i18n="notes.links.title">Internal links</strong><p data-i18n="notes.links.description">Relative references, encoded URLs, case differences, and renamed files.</p></article>
+          <article><strong data-i18n="notes.kindle.title">Kindle content</strong><p data-i18n="notes.kindle.description">Cover, NAV, NCX, XHTML, XML, CSS, images, fonts, and unwanted files.</p></article>
         </div>
-        <p class="important-note"><strong data-i18n="notes.importantLabel">Importante:</strong> <span data-i18n="notes.importantText">EPUBs protegidos por DRM ou com conteúdo criptografado são diagnosticados, mas não são alterados. Esta ferramenta não remove DRM.</span></p>
+        <p class="important-note"><strong data-i18n="notes.importantLabel">Important:</strong> <span data-i18n="notes.importantText">EPUBs protected by DRM or containing encrypted content are diagnosed but not modified. This tool does not remove DRM.</span></p>
       </div>
     </details>
 
     <footer>
       <span>Kindle EPUB Fix</span>
-      <span data-i18n="footer.local">Funciona inteiramente no navegador.</span>
+      <span data-i18n="footer.local">Runs entirely in your browser.</span>
     </footer>
 
     <div id="previewOverlay" class="preview-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="preview-title">
       <div class="preview-dialog">
         <header class="preview-head">
-          <strong id="preview-title" data-i18n="preview.title">Prévia do livro</strong>
-          <button id="previewClose" class="icon-button" type="button" data-i18n-aria-label="preview.close" aria-label="Fechar">×</button>
+          <strong id="preview-title" data-i18n="preview.title">Book preview</strong>
+          <button id="previewClose" class="icon-button" type="button" data-i18n-aria-label="preview.close" aria-label="Close">×</button>
         </header>
-        <div class="preview-modes" role="group" data-i18n-aria-label="preview.modesLabel" aria-label="Modo de margem">
+        <div class="preview-modes" role="group" data-i18n-aria-label="preview.modesLabel" aria-label="Margin mode">
           <button class="preview-mode active" data-mode="original" type="button" data-i18n="preview.original">Original</button>
-          <button class="preview-mode" data-mode="reduced" type="button" data-i18n="preview.reduced">Margens reduzidas</button>
-          <button class="preview-mode" data-mode="mini" type="button" data-i18n="preview.mini">Mini-margens</button>
+          <button class="preview-mode" data-mode="reduced" type="button" data-i18n="preview.reduced">Reduced margins</button>
+          <button class="preview-mode" data-mode="mini" type="button" data-i18n="preview.mini">Mini margins</button>
         </div>
         <div class="preview-nav">
-          <button id="previewPrev" class="preview-nav-button" type="button" data-i18n-aria-label="preview.prevChapter" aria-label="Capítulo anterior">‹</button>
+          <button id="previewPrev" class="preview-nav-button" type="button" data-i18n-aria-label="preview.prevChapter" aria-label="Previous chapter">‹</button>
           <span id="previewPageLabel" class="preview-page-label"></span>
-          <button id="previewNext" class="preview-nav-button" type="button" data-i18n-aria-label="preview.nextChapter" aria-label="Próximo capítulo">›</button>
+          <button id="previewNext" class="preview-nav-button" type="button" data-i18n-aria-label="preview.nextChapter" aria-label="Next chapter">›</button>
         </div>
         <div id="previewBody" class="preview-body"><iframe id="previewFrame" sandbox="" title="Prévia"></iframe></div>
-        <p id="previewNote" class="preview-note" data-i18n="preview.note">Prévia aproximada, sem scripts. O Kindle pode renderizar de forma diferente.</p>
+        <p id="previewNote" class="preview-note" data-i18n="preview.note">Approximate preview, no scripts. Kindle may render differently.</p>
       </div>
     </div>
   </main>

@@ -16,7 +16,9 @@ firebase-debug.*.log*
 skills-lock.json
 
 # Google site verification
-google*
+# O HTML de verificacao do Search Console fica versionado de proposito: ele e
+# publico de qualquer forma e, se sumir do public/, o Google revalida a
+# propriedade e o site sai do Search Console.
 
 # Firebase config
 

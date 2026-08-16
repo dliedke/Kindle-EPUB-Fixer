@@ -53,7 +53,7 @@ O `.csproj`/`.slnx` existem apenas para dar uma solution ao Visual Studio (`net1
 
 | Arquivo | Papel |
 | --- | --- |
-| `index.html` | Marcação (~310 linhas), IDs dos controles, metadados SEO multilíngues |
+| `index.html` | Marcação (~360 linhas), IDs dos controles, metadados SEO, painel de apresentação |
 | `app.js` | Toda a lógica (~3.100 linhas): leitura do ZIP, diagnósticos, correções, reconstrução, prévia, UI |
 | `i18n.js` | Tabela de traduções (~4.950 linhas) + `LANGUAGE_META` |
 | `styles.css` | Estilos |
@@ -138,12 +138,70 @@ O idioma também é dirigível por URL (`?lang=xx`, ver `applyLanguageFromUrl()`
 Um idioma novo exige, além do bloco em `translations`:
 
 1. A entrada em `LANGUAGE_META` (`i18n.js`), na posição correta da ordem por número de falantes.
-2. **`index.html`** — uma linha `<link rel="alternate" hreflang="xx" href="…/?lang=xx">` e um `<meta property="og:locale:alternate">` correspondente. Ainda é manual.
+2. **`index.html`** — um `<meta property="og:locale:alternate">` correspondente e o
+   código na lista `inLanguage` do JSON-LD. Ainda é manual.
 3. **Sitemap** — nada a fazer. O `sitemap.txt` publicado tem só a URL raiz
    (`https://kindle-epub-fix.web.app/`), sem uma entrada por idioma, e é ele que o
    `robots.txt` aponta.
+4. **`document.title`** — a chave existe traduzida em cada bloco e alimenta também
+   `og:title`/`twitter:title` via `updateSeoMeta()`. Não deixe o valor genérico.
 
-Use o `hreflang` de `LANGUAGE_META.htmlLang` (ex.: `zh` → `zh-CN`, `pt` → `pt-BR`), mas o parâmetro da URL é sempre o código curto (`?lang=zh`, `?lang=pt`).
+Use o `og:locale` de `LANGUAGE_META.locale` com `-` trocado por `_` (ex.: `zh` →
+`zh_CN`, `pt` → `pt_BR`); o parâmetro da URL é sempre o código curto (`?lang=zh`,
+`?lang=pt`).
+
+**Não adicione `<link rel="alternate" hreflang>`.** As variantes `?lang=xx` servem
+exatamente o mesmo HTML e todas apontam o canonical para a raiz — um `hreflang`
+apontaria para URLs não canônicas e vira erro no Search Console. Ver "SEO e
+indexação".
+
+## SEO e indexação
+
+O site é uma **única página indexável**: `https://kindle-epub-fix.web.app/`. Tudo o
+que existe para o Google está listado abaixo — mexer em qualquer um destes pontos
+sem entender o conjunto já quebrou a indexação antes.
+
+| Peça | Onde | Regra |
+| --- | --- | --- |
+| `canonical` | `index.html` + `updateSeoMeta()` | Aponta **sempre** para a raiz, nunca para `?lang=xx`. Auto-referenciar `?lang` gerava "Cópia sem página canônica" no GSC. |
+| `og:url` | `updateSeoMeta()` | Este sim reflete o `?lang=xx` corrente — é para compartilhamento social, não para indexação. |
+| `robots.txt` | raiz | `Allow: /` + `Sitemap:` apontando para o `sitemap.txt`. |
+| `sitemap.txt` | raiz | Uma linha só, a URL raiz. Formato texto puro é válido para o Google. |
+| `sitemap.xml` | — | **Não existe de propósito.** `deploy.cmd` apaga e aborta se sobrar. |
+| Verificação do GSC | `google*.html` na raiz | Versionado de propósito. Se sumir do `public/`, o Google revalida e o site cai do Search Console. `deploy.cmd` aborta se não achar. |
+| `hreflang` | — | **Não existe de propósito.** Ver "Ao adicionar um novo idioma". |
+| Cache | `firebase.json` | `index.html` **e** `/` recebem `no-cache` — o matcher de headers é por caminho de requisição, e `/` não bate com `index.html`. Sem as duas entradas a raiz sai com `max-age=3600`. |
+
+### O painel de apresentação é o conteúdo indexável
+
+`#introPanel` (`.intro-panel`), entre o hero e o painel de upload, é o único texto substancial que o
+Google tem para julgar a página — sem ele a página é praticamente só controles, o que
+costuma render "Rastreada — no momento não indexada". São 16 chaves `intro.*` nos 21
+blocos: `kicker`, `title`, `lead`, `privacy` e seis pares `title`/`description`
+(`diagnose`, `package`, `toc`, `margins`, `batch`, `report`).
+
+O bloco é um `<details class="collapsible-panel">` que o usuário pode recolher, e a
+preferência fica em `localStorage` (`kef.introOpen`, via `setupIntroPanel()` no
+`app.js`). **O `open` no HTML não é opcional:** o Googlebot não tem `localStorage`, então
+o que ele renderiza é sempre o estado do markup. Nunca publique o painel sem `open`, nem
+o mova para o rodapé sem motivo, e mantenha os textos descritivos de verdade — é o que
+sustenta a indexação.
+
+### O HTML servido fica em inglês
+
+`<html lang="en">` e todo o texto de fallback do `<body>` estão em inglês porque
+`DEFAULT_LANGUAGE` do `i18n.js` é `en` e o Googlebot renderiza com `Accept-Language: en`.
+O app troca `lang`, `dir`, `title` e o texto inteiro por JS em `applyTranslations()`;
+se o HTML bruto estiver em outro idioma, o que o Google baixa e o que ele renderiza
+divergem em `lang`, `title` e `description`. **Ao mexer no `index.html`, mantenha os
+textos de fallback em inglês e iguais aos valores do bloco `en` do `i18n.js`.**
+
+### Duplicação de domínio
+
+O Firebase publica em `kindle-epub-fix.web.app` **e** `kindle-epub-fix.firebaseapp.com`,
+os dois com 200 e o mesmo conteúdo. Não dá para redirecionar por host no Firebase
+Hosting; quem resolve é o `canonical` apontando para `.web.app`. No Search Console,
+cadastre e trabalhe só com o `.web.app`.
 
 ## Convenções
 
@@ -155,7 +213,7 @@ Use o `hreflang` de `LANGUAGE_META.htmlLang` (ex.: `zh` → `zh-CN`, `pt` → `p
 
 ## Fragilidades conhecidas
 
-- **`index.html` manual** — os `hreflang` e `og:locale:alternate` do `<head>` ainda são editados à mão, sem nenhuma verificação de que todos os idiomas de `LANGUAGE_META` estão lá.
+- **`index.html` manual** — os `og:locale:alternate` e o `inLanguage` do JSON-LD no `<head>` ainda são editados à mão, sem nenhuma verificação de que todos os idiomas de `LANGUAGE_META` estão lá. O mesmo vale para os textos de fallback do `<body>`, que precisam continuar em inglês (ver "SEO e indexação").
 - **Opção nova esquecida em `useRecommendedOptions()`** — o objeto `recommended` repete as 12 chaves à mão; uma opção que não entre lá simplesmente não é tocada pelo botão de recomendadas.
 - **`tools/generate-sitemap.js` órfão** — sobrou do fluxo antigo de `sitemap.xml` multilíngue; ninguém o chama e o `deploy.cmd` agora apaga o XML que ele produziria.
 - **Espelho `public/`** — só sincroniza via `deploy.cmd`; um commit que altera a raiz sem rodar o deploy deixa as duas cópias divergentes.

@@ -65,7 +65,19 @@ if errorlevel 1 (
     exit /b 1
 )
 
-copy /Y google*.html public\ >nul 2>nul
+:: O HTML de verificacao do Search Console precisa continuar publicado: se ele
+:: sumir, o Google revalida a propriedade e o site cai do Search Console.
+if not exist google*.html (
+    echo Arquivo google*.html de verificacao do Search Console nao encontrado na raiz.
+    echo Baixe-o novamente no Search Console antes de fazer o deploy.
+    exit /b 1
+)
+
+copy /Y google*.html public\ >nul
+if errorlevel 1 (
+    echo Falha ao copiar o HTML de verificacao do Search Console.
+    exit /b 1
+)
 
 if not exist public\vendor mkdir public\vendor
 

@@ -84,6 +84,7 @@
     applyOptionsToAllButton: document.getElementById("applyOptionsToAllButton"),
     settingsScope: document.getElementById("settingsScope"),
     settingsPanel: document.getElementById("settingsPanel"),
+    introPanel: document.getElementById("introPanel"),
     idleState: document.getElementById("idleState"),
     progressState: document.getElementById("progressState"),
     resultState: document.getElementById("resultState"),
@@ -163,7 +164,7 @@
     return jobs.find((job) => job.id === id) || null;
   }
 
-  const STORAGE_KEYS = { options: "kef.options", lang: "kef.lang" };
+  const STORAGE_KEYS = { options: "kef.options", lang: "kef.lang", introOpen: "kef.introOpen" };
 
   function safeStorageGet(key) {
     try { return window.localStorage.getItem(key); } catch { return null; }
@@ -190,6 +191,17 @@
     if (miniMarginsInput?.checked && reduceMarginsInput) reduceMarginsInput.checked = false;
   }
 
+  // O painel de apresentacao vem aberto no HTML de proposito (o Googlebot nao tem
+  // localStorage e precisa ver o texto). So fechamos aqui se o usuario tiver fechado
+  // antes; qualquer outro valor mantem o padrao aberto.
+  function setupIntroPanel() {
+    if (!dom.introPanel) return;
+    if (safeStorageGet(STORAGE_KEYS.introOpen) === "0") dom.introPanel.open = false;
+    dom.introPanel.addEventListener("toggle", () => {
+      safeStorageSet(STORAGE_KEYS.introOpen, dom.introPanel.open ? "1" : "0");
+    });
+  }
+
   function applyStoredLanguage() {
     const stored = safeStorageGet(STORAGE_KEYS.lang);
     if (!stored) return;
@@ -213,6 +225,7 @@
     }
     window.addEventListener("epubfixer:languagechange", refreshLocalizedInterface);
     updateSeoMeta();
+    setupIntroPanel();
 
     if (typeof JSZip === "undefined") {
       setFatalInterfaceError(t("runtime.jszipMissing"));
