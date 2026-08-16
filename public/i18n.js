@@ -33,7 +33,7 @@
 
   const translations = {
     pt: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "Idioma",
       "hero.eyebrow": "100% local · nenhum upload",
       "hero.copy": "Analisa, corrige e reconstrói arquivos EPUB para aumentar a compatibilidade com o Send to Kindle.",
@@ -263,7 +263,7 @@
       "score.tier.incompatible": "Incompatível"
     },
     en: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "Language",
       "hero.eyebrow": "100% local · no uploads",
       "hero.copy": "Analyzes, repairs, and rebuilds EPUB files to improve compatibility with Send to Kindle.",
@@ -493,7 +493,7 @@
       "score.tier.incompatible": "Incompatible"
     },
     zh: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "语言",
       "hero.eyebrow": "100% 本地 · 无需上传",
       "hero.copy": "分析、修复并重建 EPUB 文件，以提升与 Send to Kindle 的兼容性。",
@@ -722,7 +722,7 @@
       "score.tier.incompatible": "不兼容"
     },
     hi: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "भाषा",
       "hero.eyebrow": "100% लोकल · कोई अपलोड नहीं",
       "hero.copy": "Send to Kindle के साथ संगतता बढ़ाने के लिए EPUB फ़ाइलों का विश्लेषण, मरम्मत और पुनर्निर्माण करता है।",
@@ -951,7 +951,7 @@
       "score.tier.incompatible": "असंगत"
     },
     es: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "Idioma",
       "hero.eyebrow": "100% local · sin subidas",
       "hero.copy": "Analiza, repara y reconstruye archivos EPUB para mejorar la compatibilidad con Send to Kindle.",
@@ -1181,7 +1181,7 @@
       "score.tier.incompatible": "Incompatible"
     },
     fr: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "Langue",
       "hero.eyebrow": "100 % local · aucun envoi",
       "hero.copy": "Analyse, répare et reconstruit les fichiers EPUB pour améliorer la compatibilité avec Send to Kindle.",
@@ -1411,7 +1411,7 @@
       "score.tier.incompatible": "Incompatible"
     },
     ar: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "اللغة",
       "hero.eyebrow": "‏100% محلي · بدون أي رفع",
       "hero.copy": "يحلّل ملفات EPUB ويصلحها ويعيد بناءها لتحسين التوافق مع Send to Kindle.",
@@ -1640,7 +1640,7 @@
       "score.tier.incompatible": "غير متوافق"
     },
     bn: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "ভাষা",
       "hero.eyebrow": "১০০% লোকাল · কোনো আপলোড নেই",
       "hero.copy": "Send to Kindle-এর সঙ্গে সামঞ্জস্য বাড়াতে EPUB ফাইল বিশ্লেষণ, মেরামত ও পুনর্গঠন করে।",
@@ -1869,7 +1869,7 @@
       "score.tier.incompatible": "অসামঞ্জস্যপূর্ণ"
     },
     ru: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "Язык",
       "hero.eyebrow": "100% локально · без загрузок",
       "hero.copy": "Анализирует, восстанавливает и пересобирает файлы EPUB для улучшения совместимости с Send to Kindle.",
@@ -2099,7 +2099,7 @@
       "score.tier.incompatible": "Несовместимо"
     },
     ur: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "زبان",
       "hero.eyebrow": "‏100% مقامی · کوئی اپ لوڈ نہیں",
       "hero.copy": "Send to Kindle کے ساتھ مطابقت بہتر بنانے کے لیے EPUB فائلوں کا تجزیہ، مرمت اور دوبارہ تعمیر کرتا ہے۔",
@@ -2328,7 +2328,7 @@
       "score.tier.incompatible": "غیر مطابق"
     },
     id: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "Bahasa",
       "hero.eyebrow": "100% lokal · tanpa unggahan",
       "hero.copy": "Menganalisis, memperbaiki, dan membangun ulang berkas EPUB untuk meningkatkan kompatibilitas dengan Send to Kindle.",
@@ -2557,7 +2557,7 @@
       "score.tier.incompatible": "Tidak kompatibel"
     },
     de: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "Sprache",
       "hero.eyebrow": "100 % lokal · keine Uploads",
       "hero.copy": "Analysiert, repariert und erstellt EPUB-Dateien neu, um die Kompatibilität mit Send to Kindle zu verbessern.",
@@ -2787,7 +2787,7 @@
       "score.tier.incompatible": "Inkompatibel"
     },
     ja: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "言語",
       "hero.eyebrow": "100% ローカル · アップロードなし",
       "hero.copy": "EPUB ファイルを解析・修復・再構築し、Send to Kindle との互換性を高めます。",
@@ -3016,7 +3016,7 @@
       "score.tier.incompatible": "非互換"
     },
     tr: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "Dil",
       "hero.eyebrow": "%100 yerel · yükleme yok",
       "hero.copy": "Send to Kindle uyumluluğunu artırmak için EPUB dosyalarını analiz eder, onarır ve yeniden oluşturur.",
@@ -3246,7 +3246,7 @@
       "score.tier.incompatible": "Uyumsuz"
     },
     ko: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "언어",
       "hero.eyebrow": "100% 로컬 · 업로드 없음",
       "hero.copy": "Send to Kindle 호환성을 높이기 위해 EPUB 파일을 분석, 복구, 재구성합니다.",
@@ -3475,7 +3475,7 @@
       "score.tier.incompatible": "호환 불가"
     },
     vi: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "Ngôn ngữ",
       "hero.eyebrow": "100% cục bộ · không tải lên",
       "hero.copy": "Phân tích, sửa chữa và tạo lại tệp EPUB để cải thiện khả năng tương thích với Send to Kindle.",
@@ -3704,7 +3704,7 @@
       "score.tier.incompatible": "Không tương thích"
     },
     it: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "Lingua",
       "hero.eyebrow": "100% locale · nessun caricamento",
       "hero.copy": "Analizza, ripara e ricostruisce i file EPUB per migliorare la compatibilità con Send to Kindle.",
@@ -3934,7 +3934,7 @@
       "score.tier.incompatible": "Incompatibile"
     },
     mr: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "भाषा",
       "hero.eyebrow": "१००% लोकल · कोणतेही अपलोड नाही",
       "hero.copy": "Send to Kindle सोबत सुसंगतता वाढवण्यासाठी EPUB फाइल्सचे विश्लेषण, दुरुस्ती व पुनर्रचना करते.",
@@ -4163,7 +4163,7 @@
       "score.tier.incompatible": "विसंगत"
     },
     te: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "భాష",
       "hero.eyebrow": "100% లోకల్ · అప్‌లోడ్‌లు లేవు",
       "hero.copy": "Send to Kindle తో అనుకూలతను మెరుగుపరచడానికి EPUB ఫైళ్లను విశ్లేషించి, మరమ్మతు చేసి, తిరిగి నిర్మిస్తుంది.",
@@ -4392,7 +4392,7 @@
       "score.tier.incompatible": "అననుకూలం"
     },
     ta: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "மொழி",
       "hero.eyebrow": "100% லோக்கல் · பதிவேற்றம் இல்லை",
       "hero.copy": "Send to Kindle உடன் இணக்கத்தை மேம்படுத்த EPUB கோப்புகளை பகுப்பாய்வு செய்து, சரிசெய்து, மீண்டும் உருவாக்குகிறது.",
@@ -4621,7 +4621,7 @@
       "score.tier.incompatible": "பொருந்தாதது"
     },
     nl: {
-      "document.title": "Kindle EPUB Fixer",
+      "document.title": "Kindle EPUB Fix",
       "language.label": "Taal",
       "hero.eyebrow": "100% lokaal · geen uploads",
       "hero.copy": "Analyseert, repareert en herbouwt EPUB-bestanden om de compatibiliteit met Send to Kindle te verbeteren.",

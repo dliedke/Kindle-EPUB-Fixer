@@ -1,10 +1,10 @@
 (() => {
   "use strict";
 
-  const APP_NAME = "Kindle EPUB Fixer";
+  const APP_NAME = "Kindle EPUB Fix";
   const APP_VERSION = "1.1.0";
   const i18n = window.EpubFixerI18n;
-  const SITE_ORIGIN = "https://kindle-epub-fixer.web.app";
+  const SITE_ORIGIN = "https://kindle-epub-fix.web.app";
   let urlLanguageParamActive = false;
 
   function t(key, variables = {}) {

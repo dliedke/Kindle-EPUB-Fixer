@@ -1,4 +1,4 @@
-# Kindle EPUB Fixer
+# Kindle EPUB Fix
 
 Local web application to diagnose, fix, and rebuild EPUB files with a focus on compatibility with **Send to Kindle**.
 
@@ -45,7 +45,7 @@ No dependencies, terminal, or server are required. All processing happens in the
 ## Project structure
 
 ```text
-kindle-epub-fixer/
+kindle-epub-fix/
 ├── index.html
 ├── styles.css
 ├── i18n.js

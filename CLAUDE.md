@@ -4,7 +4,7 @@ Orientações para o Claude Code trabalhar neste repositório.
 
 ## Visão geral
 
-**Kindle EPUB Fixer** — aplicação web 100% client-side que diagnostica, corrige e reconstrói arquivos EPUB visando compatibilidade com o **Send to Kindle**. Não há backend: o EPUB nunca sai do navegador. Publicada em Firebase Hosting (`https://kindle-epub-fixer.web.app`).
+**Kindle EPUB Fix** — aplicação web 100% client-side que diagnostica, corrige e reconstrói arquivos EPUB visando compatibilidade com o **Send to Kindle**. Não há backend: o EPUB nunca sai do navegador. Publicada em Firebase Hosting (`https://kindle-epub-fix.web.app`).
 
 Sem build step, sem npm, sem framework. JavaScript puro (IIFE, `"use strict"`), única dependência é `vendor/jszip.min.js`.
 
@@ -140,7 +140,7 @@ Um idioma novo exige, além do bloco em `translations`:
 1. A entrada em `LANGUAGE_META` (`i18n.js`), na posição correta da ordem por número de falantes.
 2. **`index.html`** — uma linha `<link rel="alternate" hreflang="xx" href="…/?lang=xx">` e um `<meta property="og:locale:alternate">` correspondente. Ainda é manual.
 3. **Sitemap** — nada a fazer. O `sitemap.txt` publicado tem só a URL raiz
-   (`https://kindle-epub-fixer.web.app/`), sem uma entrada por idioma, e é ele que o
+   (`https://kindle-epub-fix.web.app/`), sem uma entrada por idioma, e é ele que o
    `robots.txt` aponta.
 
 Use o `hreflang` de `LANGUAGE_META.htmlLang` (ex.: `zh` → `zh-CN`, `pt` → `pt-BR`), mas o parâmetro da URL é sempre o código curto (`?lang=zh`, `?lang=pt`).
